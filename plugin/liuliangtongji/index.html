@@ -1,0 +1,1130 @@
+<style>
+    /*样式*/
+    .table td{word-wrap : break-word;word-break:break-all;}
+    .layui-layer-page .layui-layer-content {position: relative;overflow: hidden;}
+    .chooseweb{float:left;}
+    .loadingbox{width:100%;height:550px;line-height:550px;text-align:center;color:#ffffff;background:rgba(0,0,0,0.4);position:absolute;top:0;font-size:50px;z-index:999999;}
+    .plugin_body{width:100%;margin-top:10px;height:475px;overflow-x:auto;overflow-y:auto;}
+    .index_lanmu{width:33%;float:left;border-right:1px #ebebeb solid;}
+    .index_lanmu:last-child{border-right:0;}
+    .index_lanmu .lanmutitle{width:95%;height:40px;line-height:40px;font-size:18px;font-weight:bold;margin:0 auto;text-align:center;background:#fafafa;}
+    .index_lanmu .lanmucontent{width:95%;height:auto;overflow:hidden;margin:0 auto;}
+    .index_lanmu .lanmucontent .kg_list{width:90%;margin:0 auto;background:#ff8800;color:#ffffff;border-radius:3px;margin-top:20px;padding:10px;text-align:center;padding-top:30px;padding-bottom:30px;}
+    .index_lanmu .lanmucontent .kg_list .number{font-size:24px;font-weight:bold;}
+    .index_lanmu .lanmucontent .kg_list .t{margin-top:10px;}
+    .indexmianban{width:100%;position:absolute;height:100%;background:#ffffff;z-index:999999;}
+    .indexmianban .leftlogfilebox{width:45%;float:left;margin-left:3%;}
+    .indexmianban .rightdatabasebox{width:45%;float:right;margin-right:3%;}
+    .indexmianban .neibox{width:80%;height:auto;margin-left:20%;margin-top:15%;}
+    .indexmianban .neibox .usermoshibtn{padding:10px 15px;background:#ff6600;color:#ffffff;border:0;border-radius:100px;}
+    .databasemoshi{display:none;}
+    .page div {float: right}
+    .page span,
+    .page a {
+        display: inline-block;
+        height: 28px;
+        line-height: 28px;
+        padding: 0 10px;
+        font-family: "Arial";
+        font-size: 13px;
+        color: #666;
+        float: left;
+        border: 1px solid #ececec;
+        border-right: none;
+    }
+
+    .page a.prev {
+        border-left: #ddd solid 1px
+    }
+
+    .page a:hover {
+        background: #e8e8e8;
+        color: #20a53a;
+        text-shadow: 0 1px 0 #fff;
+        cursor: pointer
+    }
+
+    .page spanold {
+        font-size: 12px;
+        padding: 4px 10px!important;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #ddd #ddd #ccc;
+        border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+        display: inline-block;
+        line-height: 16px;
+        background: #f5f5f5;
+        color: #333;
+        text-shadow: 0 1px 0 #fff
+    }
+
+    .page .Pcurrent {
+        color: #fff;
+        background: #20a53a;
+        cursor: default;
+        border-color: #20a53a;
+    }
+
+    .page .Pcount {
+        color: #333;
+        padding: 0 10px;
+        margin-right: 0px;
+        border-right: 1px solid #ececec;
+    }
+</style>
+<link href="https://cdn.resource.rcwap.com/layui/css/animate.css" rel="stylesheet">
+<script src="/static/js/echarts.min.js"></script>
+<div class="loadingbox animated bounceIn">日志数据正在努力分析中...</div>
+<div class="bt-form">
+    <div class="bt-w-main">
+        <!--首页面板-->
+        <div class="indexmianban">
+            <div class="leftlogfilebox animated bounceInLeft">
+                <div class="neibox">
+                    <div style="font-size:32px;font-weight:bold;">文件模式</div>
+                    <div style="line-height:30px;margin-top:15px;font-size:14px;color:#999;">直接解析日志文件内容, 适用于流量小的项目, 当日志文件超过100M时, 此模式可能会引起面板卡死.</div>
+                    <div style="margin-top:20px;">
+                        <p style="font-size:18px;color:#00B710"><b>优点:</b></p>
+                        <p style="color:#00B710">可以实时查看最新日志记录</p>
+                        <p style="font-size:18px;margin-top:15px;color:#ff0000"><b>缺点:</b></p>
+                        <p style="color:#ff0000">解析大日志文件时,容易造成面板卡死</p>
+                    </div>
+                    <div style="margin-top:20px;">
+                        <button type="button" class="usermoshibtn wenjianmoshibtn">使用文件模式</button>
+                    </div>
+                </div>
+            </div>
+            <div class="rightdatabasebox animated bounceInRight">
+                <div class="neibox">
+                    <div style="font-size:32px;font-weight:bold;">数据库模式</div>
+                    <div style="line-height:30px;margin-top:15px;font-size:14px;color:#999;">
+                        将日志定时同步到面板数据库中,再从数据库中解析数据.(同步到数据库后清空日志文件,保持日志文件内容仅为新增记录)
+                        <p style="color:#ff0000">强烈推荐: <br/><b>第一次使用此模式时,建议先备份日志文件,然后使用官方日志清理工具清空日志,以免第一次同步的数据量大,造成面板卡死.</b></p>
+                    </div>
+                    <div style="margin-top:20px;">
+                        <p style="font-size:18px;color:#00B710"><b><b style="font-size:24px;">此模式必须设置计划任务</b>,计划任务设置方法:</b></p>
+                        <p style="color:#ff0000;margin-top:20px;"><a href="https://www.bt.cn/bbs/thread-32425-1-1.html" target="_blank">-->点击查看设置方法<--</a></p>
+                    </div>
+                    <div style="margin-top:20px;">
+                        <button type="button" class="usermoshibtn shujukumoshibtn">使用数据库模式</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--菜单部分-->
+        <div class="bt-w-menu">
+            <p class="bgw" onclick="demo.get_index()" data-c='index'>站点概览</p>
+            <p onclick="demo.get_echarts()" data-c='echarts'>趋势图</p>
+            <p onclick="demo.get_iplist()" data-c='iplist'>IP统计</p>
+            <p onclick="demo.get_pageurl()" data-c='pageurl'>URL统计</p>
+            <p onclick="demo.get_log()" data-c='log'>原始日志</p>
+            <p onclick="demo.get_paiming()" class="databasemoshi" data-c='paiming'>站点排名</p>
+            <p onclick="demo.get_quanzhanqushi()" class="databasemoshi" data-c='quanzhanqushi'>全站趋势</p>
+            <p onclick="demo.get_set()" data-c='set'>设置</p>
+            <p onclick="demo.get_contact()" data-c='contact'>联系我们</p>
+        </div>
+        <input type="hidden" value='index' id="pagefunction" />
+        <!--内容部分-->
+        <div class="bt-w-con pd15">
+            <div class="body_head">
+                <div class="chooseweb">
+                    <div class="">
+                        <span>选择站点:</span>
+                        <select class="bt-input-text mr5 webselectbox">
+                            <option>加载中...</option>
+                        </select>
+                        <span>当前统计的站点为:<b class="tongjiwebtxt"></b></span>
+                    </div>
+                </div>
+                <div class="searcTime pull-right" style="margin-top:0;">
+                    <span class="tit">区间检索：</span>
+                    <span class="gt" data-lx="1">昨天</span>
+                    <span class="gt on" data-lx="0">今天</span>
+                    <span class="gt" data-lx="7">最近7天</span>
+                    <span class="gt" data-lx="30">最近30天</span>
+                    <div class="ss">
+                        <span class="st">自定义时间</span>
+                        <div class="time">
+                            <span class="bt">开始时间：<input class="btime" type="text" value="2019/1/1 00:00:00"></span>
+                            <span class="et">结束时间：<input class="etime" type="text" value="2019/12/31 23:59:59"></span>
+                            <div class="sbtn loadbtn">提交</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="width:100%;height:1px;overflow:hidden"></div>
+            <div class="plugin_body" id="plugin_body">
+                <div style="width:100%;height:auto;overflow:hidden;" id="echart_body"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+<script type="text/javascript">
+    var page=1;
+    //定义窗口尺寸
+    $('.layui-layer-page').css({ 'width': '90%','top':'5%'});
+    //选择文件模式
+    $('.wenjianmoshibtn').click(function(){
+        request_plugin('liuliangtongji', 'set_config',{'key':'moshi','value':'0'}, function (rdata) {
+            $('.indexmianban').hide();
+            demo.get_weblist();
+        }); 
+    });
+    //选择数据库模式
+    $('.shujukumoshibtn').click(function(){
+        layer.confirm('选择数据库模式之后,将不能再回到文件模式,且在执行第一次同步前,请确保日志已清空,确定继续选择吗?', function(index){
+            layer.close(index);
+            request_plugin('liuliangtongji', 'set_config',{'key':'dblx','value':2}, function (rdata) {
+                request_plugin('liuliangtongji', 'setdatabasemoshi',{}, function (rdata) {
+                    $('.indexmianban').hide();
+                    demo.get_weblist();
+                })
+            }); 
+        });
+    });
+    //区间检索选择
+    $(".searcTime .gt").click(function () {
+        $('.loadingbox').show();
+        $('.searcTime .ss .time').hide();
+        $('.searcTime .ss .st').removeClass('on');
+        $(this).addClass('on').siblings().removeClass('on')
+        var lx=$(this).attr('data-lx');
+        var curDate = new Date();
+        var myDate = new Date();
+        myDate.setTime(myDate.getTime()-lx*24*60*60*1000);
+        var nowdate=CurentTime(curDate);
+        var jisuandate=CurentTime(myDate);
+        $('.searcTime .btime').val(jisuandate+'00:00:01');
+        $('.searcTime .etime').val(nowdate+'23:59:59');
+        regetdate();
+    });
+    //自定义时间
+    $(".searcTime .ss .st").click(function () {
+        $('.searcTime .gt').removeClass('on')
+        $(this).addClass('on')
+        $('.searcTime .ss .time').show();
+    });
+    //提交自定义时间
+    $(".searcTime .loadbtn").click(function () {
+        $('.loadingbox').show();
+        $('.searcTime .ss .time').hide();
+        regetdate();
+    });
+    //左测菜单切换效果
+    $(".bt-w-menu p").click(function () {
+        $('.loadingbox').show();
+        $('#pagefunction').val($(this).attr('data-c'));
+        $(this).addClass('bgw').siblings().removeClass('bgw')
+        if($(this).attr('data-c')=='set' || $(this).attr('data-c')=='contact'){
+            $('.body_head').hide();
+        }else{
+            $('.body_head').show();
+        }
+        if($(this).attr('data-c')=='paiming' || $(this).attr('data-c')=='quanzhanqushi'){
+            $('.chooseweb').hide();
+        }else{
+            $('.chooseweb').show();
+        }
+        if($(this).attr('data-c')=='contact'){
+            $('.loadingbox').hide();
+        }
+        page=1;
+    });
+    //切换站点
+    $('.webselectbox').change(function(){
+        $('.loadingbox').show();
+        regetdate();
+    });
+    //日志原始记录,点击筛选类型
+    $(".plugin_body").on('click','.sxlx',function(){
+        var sxlx=$(this).val();
+        $('#sxlx').val(sxlx);
+    });
+    //日志原始记录,点击筛选按钮
+    $(".plugin_body").on('click','.yslogsxbtn',function(){
+        var sxlx=$('#sxlx').val();
+        var keyword=$('#keyword').val();
+        if(sxlx==''){
+            layer.msg('请选择一个筛选类型!', { icon: 2 });
+            return false;
+        }
+        if(keyword==''){
+            layer.msg('请输入关键词!', { icon: 2 });
+            return false;
+        }
+        demo.get_log();
+    });
+    //保存设置
+    $(".plugin_body").on('click','#setsavebtn',function(){
+        var logpath=$('#logpath').val();
+        if(logpath==''){
+            layer.msg('请输入日志路径!', { icon: 2 });
+            return false;
+        }
+        demo.save_config();
+    });
+    //IP加入黑名单 iplahei
+    $(".plugin_body").on('click','.iplahei',function(){
+        var ip=$(this).attr('data-ip');
+        if($(this).text()=='已拉黑'){
+            return false;
+        }
+        layer.confirm('确实要拉黑 '+ip+' 吗?', function(index){
+            request_plugin('liuliangtongji', 'iplahei',{'port':ip,'ps':'日志分析插件拉黑IP'}, function (rdata) {
+                layer.msg(rdata.msg, { icon: 1 });
+            });
+        })
+    });
+    //流量排序,访问次数
+    $(".plugin_body").on('click','.datapaixu',function(){
+        var orderby=$(this).attr('data-x');
+        var pl=$(this).attr('data-p');
+        $(this).css('font-weight','bold');
+        if(pl=="ip"){
+            demo.get_iplist(orderby);
+        }else{
+            demo.get_pageurl(orderby);
+        }
+    });
+    
+    var demo = {
+        //获取站点列表 access
+        get_weblist:function(){
+            $('.loadingbox').show();
+            var weblisthtml='';
+            request_plugin('liuliangtongji', 'get_weblist','', function (rdata) {
+                var weblist=rdata.weblist;
+                for (var i = 0; i < weblist.length; i++) {
+                    weblisthtml += '<option value="'+weblist[i].name+'">'+weblist[i].name+' ('+weblist[i].ps+')</option>'
+                }
+                $('.webselectbox').html(weblisthtml);
+                demo.get_index();
+            });
+        },
+        //获取参数
+        get_canshu:function(){
+            $('.loadingbox').show();
+            var website=$('.webselectbox').val();
+            if(website == undefined || website=='加载中...'){
+                layer.msg('加载失败', { icon: 1 });
+            }
+            $('.tongjiwebtxt').html('<a href="http://'+website+'" target="_blank">'+website+'</a>');
+            var s_datetime=$('.searcTime .btime').val();
+            var e_datetime=$('.searcTime .etime').val();
+            return {'website':website,'s_datetime':s_datetime,'e_datetime':e_datetime}
+        },
+        //构造概览内容
+        get_index: function () {
+            var canshu=demo.get_canshu();
+            request_plugin('liuliangtongji', 'get_index',{'website':canshu.website,'s_datetime':canshu.s_datetime,'e_datetime':canshu.e_datetime}, function (rdata) {
+                //将前10名的ip置入排行榜
+                var iptophtml='',iparray_new=rdata.iplist;
+                for(var i in iparray_new){
+                        iptophtml+='<tr><td><a href="http://ip138.com/ips138.asp?ip='+iparray_new[i][0]+'&action=2" target="_blank"><span class="ipaddress">'+iparray_new[i][0]+'</span> <span class="ipguishu" style="color:#cccccc">(未知)</span></a></td><td>'+iparray_new[i][1]+'</td><td><a href="javascript:;" class="iplahei" data-ip="'+iparray_new[i][0]+'">拉黑</a></td></tr>';
+                }
+                //将前10名的ip置入排行榜
+                var lltophtml='',llarray_new=rdata.sizelist;
+                for(var i in llarray_new){
+                    if(i<12){
+                        lltophtml+='<tr><td><a href="http://ip138.com/ips138.asp?ip='+llarray_new[i][0]+'&action=2" target="_blank"><span class="ipaddress">'+llarray_new[i][0]+'</span> <span class="ipguishu" style="color:#cccccc">(未知)</span></a></td><td>'+llarray_new[i][1]+'</td><td><a href="javascript:;" class="iplahei" data-ip="'+llarray_new[i][0]+'">拉黑</a></td></tr>';
+                    }
+                }
+                var totalinfo=rdata.totalinfo;
+                var bodyhtml='<div class="index_lanmu">\
+                    <div class="lanmutitle">流量概况</div>\
+                    <div class="lanmucontent">\
+                                  <div class="kg_list animated bounceInLeft">\
+                                      <div class="number totalsize">'+totalinfo[3]+'</div>\
+                                      <div class="t">总流量</div>\
+                                  </div>\
+                                  <div class="kg_list animated bounceInRight" style="background:#1a9cff">\
+                                      <div class="number totalvist">'+totalinfo[0]+'人次</div>\
+                                      <div class="t">访问人次</div>\
+                                  </div>\
+                                  <div class="kg_list animated bounceInLeft" style="background:#48eb57">\
+                                      <div class="number totalip">'+totalinfo[2]+'个</div>\
+                                      <div class="t">访问IP量</div>\
+                                  </div>\
+                              </div>\
+                          </div>\
+                          <div class="index_lanmu animated bounceInLeft">\
+                              <div class="lanmutitle">IP访问量 (TOP10)</div>\
+                              <div class="lanmucontent">\
+                                  <table class="table table-hover">\
+                                      <thead>\
+                                          <tr>\
+                                            <td width="60%">IP</td>\
+                                            <td>访问次数</td>\
+                                            <td width="20%">操作</td>\
+                                          </tr>\
+                                      </thead>\
+                                      <tbody>'+iptophtml+'</tbody>\
+                                  </table>\
+                              </div>\
+                          </div>\
+                          <div class="index_lanmu animated bounceInRight">\
+                              <div class="lanmutitle">IP流量 (TOP10)</div>\
+                              <div class="lanmucontent">\
+                                  <table class="table table-hover">\
+                                      <thead>\
+                                          <tr>\
+                                            <td width="60%">IP</td>\
+                                            <td>流量</td>\
+                                            <td width="20%">操作</td>\
+                                          </tr>\
+                                      </thead>\
+                                      <tbody class="liuliangtopbox">'+lltophtml+'</tbody>\
+                                  </table>\
+                              </div>\
+                          </div>';
+                $('.plugin_body').html(bodyhtml);
+                demo.getipinfo(0)
+                demo.getipheimingdan(0)
+            });
+        },
+        //遍历首页的IP列表,查询属地
+        getipinfo:function(i){
+            var ipstr='',testcontent;
+            var totalip=$('.plugin_body .ipaddress').length;
+            ipstr=$('.ipaddress').eq(i).text();
+            $.ajax({
+                type:'GET',
+                url: 'http://api.test.rcwap.com/api/index.php?c=ip&a=ip&ip='+ipstr,
+                timeout:3000,
+                dataType:'json',
+                async:true,
+                success: function(rdata) {
+                    testcontent=rdata.data.country+rdata.data.region+rdata.data.city;
+                    $('.plugin_body').find('.ipguishu').eq(i).html(testcontent);
+                    i=i+1;
+                    if(i<totalip){
+                        demo.getipinfo(i);
+                    }
+                },
+                error: function(rdata) {
+                    $('.plugin_body').find('.ipguishu').eq(i).html('未知');
+                    i=i+1;
+                    if(i<totalip){
+                        demo.getipinfo(i);
+                    }
+                }
+            });
+        },
+        //遍历是否已加入黑名单
+        getipheimingdan:function(i){
+            var ipstr='';
+            var totalip=$('.plugin_body .ipaddress').length;
+            ipstr=$('.ipaddress').eq(i).text();
+            request_plugin('liuliangtongji', 'isheimingdan',{'ip':ipstr}, function (rdata) {
+                if(rdata.stauts==1){
+                    $('.plugin_body').find('.iplahei').eq(i).html('<b style="color:#ff0000">已拉黑</b>');
+                }
+                i=i+1;
+                if(i<totalip){
+                    demo.getipheimingdan(i);
+                }
+
+            })
+        },
+        //图表分析
+        get_echarts:function(){
+            var canshu=demo.get_canshu();
+            request_plugin('liuliangtongji', 'get_echarts',{'website':canshu.website,'s_datetime':canshu.s_datetime,'e_datetime':canshu.e_datetime}, function (rdata) {
+                var liuliangchart = echarts.init(document.getElementById('plugin_body'));
+                // 指定图表的配置项和数据
+                var option = {
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['访问量趋势','流量趋势']
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: rdata.x_zuobiao
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [
+                        {
+                            name:'访问量趋势',
+                            type:'line',
+                            stack: '访问量',
+                            smooth:true,
+                            data:rdata.fwdata,
+                            itemStyle : { normal: {label : {show: true}}}
+                        },
+                        {
+                            name:'流量趋势',
+                            type:'line',
+                            stack: '流量',
+                            smooth:true,
+                            data:rdata.lldata,
+                            itemStyle : { normal: {label : {show: true}}}
+                        }
+                    ]
+                };
+                liuliangchart.setOption(option);
+            });
+        },
+        //分析ip记录
+        get_iplist : function (orderby='count') {
+            var canshu=demo.get_canshu();
+            request_plugin('liuliangtongji', 'get_ipata',{'website':canshu.website,'s_datetime':canshu.s_datetime,'e_datetime':canshu.e_datetime,'orderby':orderby,'p':page}, function (rdata) {
+                var lltophtml='',statuscolor,llarray_new=rdata.data;
+                for(var i in llarray_new){
+                    if(llarray_new[i][6]<400){
+                        statuscolor='#377132'
+                    }else{
+                        statuscolor='#ff0000'
+                    }
+                    var shebeiinfo=llarray_new[i][10],zhizhuinfo='';
+                    //判断是否为蜘蛛IP
+                    if(shebeiinfo.indexOf("Googlebot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[谷歌蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("bingbot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[Bing蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("YisouSpider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[神马蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("Baiduspider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[百度蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("360Spider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[360蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("Sosospider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[SOSO蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("YoudaoBot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[有道蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("Sogouwebspider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[搜狗蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("CCBot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[CC蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("AhrefsBot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[国外Ahrefs蜘蛛]</span>'
+                    }
+                    lltophtml+='<tr><td><a href="http://ip138.com/ips138.asp?ip='+llarray_new[i][0]+'&action=2" target="_blank"><span class="ipaddress">'+llarray_new[i][0]+ '</span> '+zhizhuinfo+'</a></td> <td><a href="javascript:;" class="iplahei" data-ip="'+llarray_new[i][0]+'">拉黑</a></td><td>'+llarray_new[i][1]+'</td><td>'+((llarray_new[i][2])/1024/1024).toFixed(2)+'MB</td><td>'+llarray_new[i][5]+'</td><td>'+llarray_new[i][8]+'</td><td><span style="color:'+statuscolor+'">['+llarray_new[i][6]+']</span> <a href="http://'+canshu.website+llarray_new[i][9]+'" target="_blank">'+llarray_new[i][9]+'</a></td><td>'+llarray_new[i][10]+'</td></tr>';
+                }
+                if(orderby=='count'){
+                    var pxsytle1="style='font-weight:bold;color:#ff0000'";
+                }
+                if(orderby=='size'){
+                    var pxsytle2="style='font-weight:bold;color:#ff0000'";
+                }
+                var bodyhtml='<table class="table table-hover animated bounceInDown">\
+                  <thead>\
+                    <tr>\
+                      <td width="15%">IP</td>\
+                      <td width="5%">拉黑</td>\
+                      <td width="10%" class="datapaixu" '+pxsytle1+' data-x="count" data-p="ip">访问次数[排序]</td>\
+                      <td width="10%" class="datapaixu" '+pxsytle2+' data-x="size" data-p="ip">流量[排序]</td>\
+                      <td width="10%">最后访问时间</td>\
+                      <td width="10%">最后访问方式</td>\
+                      <td width="15%">访问页面</td>\
+                      <td width="25%">设备信息</td>\
+                    </tr>\
+                  </thead>\
+                  <tbody>'+lltophtml+'</tbody>\
+                </table>';
+                bodyhtml+='<div class="page" data-c="get_log">'+rdata.page.page+'</div>'
+                $('.plugin_body').html(bodyhtml);
+                demo.getipheimingdan(0)
+            });
+        },
+        //分析页面访问统计
+        get_pageurl:function(orderby='count'){
+            var canshu=demo.get_canshu();
+            request_plugin('liuliangtongji', 'get_urlata',{'website':canshu.website,'s_datetime':canshu.s_datetime,'e_datetime':canshu.e_datetime,'orderby':orderby,'p':page}, function (rdata) {
+                var lltophtml='',statuscolor,llarray_new=rdata.data;
+                for(var i in llarray_new){
+                    if(llarray_new[i][6]<400){
+                        statuscolor='#377132'
+                    }else{
+                        statuscolor='#ff0000'
+                    }
+                    lltophtml+='<tr><td><span style="color:'+statuscolor+'">['+llarray_new[i][6]+']</span> <a href="http://'+canshu.website+llarray_new[i][0]+'" target="_blank">'+llarray_new[i][0]+'</a></td><td>'+llarray_new[i][1]+'</td><td>'+((llarray_new[i][2])/1024/1024).toFixed(2)+'MB</td><td>'+llarray_new[i][5]+'</td><td>'+llarray_new[i][8]+'</td><td>'+llarray_new[i][10]+'</td></tr>';
+                }
+                if(orderby=='count'){
+                    var pxsytle1="style='font-weight:bold;color:#ff0000'";
+                }
+                if(orderby=='size'){
+                    var pxsytle2="style='font-weight:bold;color:#ff0000'";
+                }
+                var bodyhtml='<table class="table table-hover animated bounceInDown">\
+                  <thead>\
+                    <tr>\
+                      <td width="30%">页面地址</td>\
+                      <td width="10%" class="datapaixu" '+pxsytle1+' data-x="count" data-p="page">访问次数[排序]</td>\
+                      <td width="10%" class="datapaixu" '+pxsytle2+' data-x="size" data-p="page">流量[排序]</td>\
+                      <td width="10%">最后访问时间</td>\
+                      <td width="10%">最后访问方式</td>\
+                      <td width="30%">设备信息</td>\
+                    </tr>\
+                  </thead>\
+                  <tbody>'+lltophtml+'</tbody>\
+                </table>';
+                bodyhtml+='<div class="page" data-c="get_log">'+rdata.page.page+'</div>'
+                $('.plugin_body').html(bodyhtml);
+            });
+        },
+        //分析日志原始记录
+        get_log : function () {
+            var canshu=demo.get_canshu();
+            var sxlx=$('#sxlx').val();
+            var keyword=$('#keyword').val();
+            request_plugin('liuliangtongji', 'get_oldloglist',{'website':canshu.website,'s_datetime':canshu.s_datetime,'e_datetime':canshu.e_datetime,'sxlx':sxlx,'keyword':keyword,'p':page}, function (rdata) {
+                var llarray_new=rdata.data,lltophtml='';
+                for(var i in llarray_new){
+                    if(llarray_new[i][3]<400){
+                        statuscolor='#377132'
+                    }else{
+                        statuscolor='#ff0000'
+                    }
+                    var shebeiinfo=llarray_new[i][7],zhizhuinfo='';
+                    //判断是否为蜘蛛IP
+                    if(shebeiinfo.indexOf("Googlebot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[谷歌蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("bingbot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[Bing蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("YisouSpider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[神马蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("Baiduspider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[百度蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("360Spider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[360蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("Sosospider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[SOSO蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("YoudaoBot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[有道蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("Sogouwebspider") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[搜狗蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("CCBot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[CC蜘蛛]</span>'
+                    }else if(shebeiinfo.indexOf("AhrefsBot") != -1){
+                        zhizhuinfo=' <span style="color:#0361FFFF">[国外Ahrefs蜘蛛]</span>'
+                    }
+                    lltophtml+='<tr><td><a href="http://ip138.com/ips138.asp?ip='+llarray_new[i][1]+'&action=2" target="_blank">'+llarray_new[i][1]+ ' '+zhizhuinfo+'</a></td><td>'+llarray_new[i][3]+'</td><td>'+((llarray_new[i][4])/1024/1024).toFixed(2)+'MB</td><td>'+llarray_new[i][2]+'</td><td>'+llarray_new[i][5]+'</td><td><a href="http://'+canshu.website+llarray_new[i][6]+'" target="_blank">'+llarray_new[i][6]+'</a></td><td>'+llarray_new[i][7]+'</td></tr>';
+                }
+                if(sxlx=='ip'){
+                    var iptxt="checked";
+                }else if(sxlx=='url'){
+                    var urltxt="checked";
+                }else if(sxlx=='status'){
+                    var statustxt="checked";
+                }else if(sxlx=='shebei'){
+                    var shebeitxt="checked";
+                }
+                if(keyword==undefined){
+                    keyword='';
+                }
+                var bodyhtml='<table class="table table-hover animated bounceInDown">\
+                  <thead>\
+                    <tr>\
+                      <td colspan="7">筛选: <label><input type="radio" class="sxlx" name="sxlx" value="ip" '+iptxt+' /> IP</label> <label style="margin-left:20px;"><input type="radio" class="sxlx" name="sxlx" value="url" '+urltxt+' /> URL</label><label style="margin-left:20px;"><input type="radio" class="sxlx" name="sxlx" value="status" '+statustxt+' /> 状态码</label><label style="margin-left:20px;"><input type="radio" class="sxlx" name="sxlx" value="shebei" '+shebeitxt+' /> 设备信息</label><span style="margin-left:20px;">关键字: <input type="text" id="keyword" name="keyword" value="'+keyword+'" /></span><span style="margin-left:20px;"><input type="button" class="yslogsxbtn" value="筛选" /></span><input type="hidden" value="'+sxlx+'" id="sxlx" /></td>\
+                    </tr>\
+                    <tr>\
+                      <td width="15%">IP</td>\
+                      <td width="10%">状态码</td>\
+                      <td width="10%">流量</td>\
+                      <td width="10%">访问时间</td>\
+                      <td width="10%">访问方式</td>\
+                      <td width="15%">访问页面</td>\
+                      <td width="30%">设备信息</td>\
+                    </tr>\
+                  </thead>\
+                  <tbody>'+lltophtml+'</tbody>\
+                </table>';
+                bodyhtml+='<div class="page" data-c="get_log">'+rdata.page.page+'</div>'
+                $('.plugin_body').html(bodyhtml);
+            });
+        },
+        //联系我们
+        get_contact:function(){
+            var bodyhtml='<table class="table table-hover animated bounceInRight">\
+                      <tr>\
+                        <td colspan="2" style="font-size:16px;font-weight:bold;border-top:0;">联系我们</td>\
+                      </tr>\
+                      <tr>\
+                        <td width="15%">插件开发:</td>\
+                        <td width="85%">软程科技 <a href="https://rcwap.com" target="_blank">rcwap.com</a></td>\
+                      </tr>\
+                      <tr>\
+                        <td width="15%">联系QQ:</td>\
+                        <td width="85%"><a target="blank" href="http://wpa.qq.com/msgrd?v=3&uin=511561588&site=qq&menu=yes" >511561588 (点击即可对话)</a></td>\
+                      </tr>\
+                      <tr>\
+                        <td width="15%">联系邮箱:</td>\
+                        <td width="85%">511561588@qq.com</td>\
+                      </tr>\
+                      <tr>\
+                        <td colspan="2" style="color:#ff0000">对此插件的使用有任何问题和建议,欢迎论坛讨论或者直接QQ联系</td>\
+                      </tr>\
+                  </table>';
+            $('.plugin_body').html(bodyhtml);
+            $('.loadingbox').hide();
+        },
+        //获取参数配置
+        get_set:function(){
+            request_plugin('liuliangtongji', 'get_config','', function (rdata) {
+                if(rdata.logpath==null || rdata.logpath==undefined){
+                    var logpath='/www/wwwlogs/';
+                }else{
+                    var logpath=rdata.logpath;
+                }
+                if(rdata.dellogdays==null || rdata.dellogdays==undefined){
+                    var dellogdays='90';
+                }else{
+                    var dellogdays=rdata.dellogdays;
+                }
+                var bodyhtml='<table class="table table-hover animated bounceInLeft">\
+                      <tr>\
+                        <td colspan="2" style="font-size:16px;font-weight:bold;border-top:0;">设置</td>\
+                      </tr>\
+                      <tr>\
+                        <td width="15%">日志路径:</td>\
+                        <td width="85%"><input type="text" id="logpath" value="'+logpath+'" /></td>\
+                      </tr>\
+                      <tr>\
+                        <td colspan="2"><button type="button" onclick="demo.save_config()">保存</button></td>\
+                      </tr>\
+                  </table>';
+                if(rdata.moshi ==1){
+                bodyhtml+='<table class="table table-hover animated bounceInLeft">\
+                      <tr>\
+                        <td colspan="2" style="font-size:16px;font-weight:bold;border-top:0;">清理日志</td>\
+                      </tr>\
+                      <tr>\
+                        <td width="15%">手动清理数据库日志:</td>\
+                        <td width="85%">清理起始时间 <input type="text" id="delstartdate" value="2019-01-01 00:00:01" /> 到结束时间 <input type="text" id="delenddate" value="2019-01-30 23:59:59" /> 的日志记录 <button type="button" style="background:#ff6600;color:#fff;border:0;margin-left:20px;" onclick="demo.del_logs()">开始清理</button></td>\
+                      </tr>\
+                      <tr>\
+                        <td width="15%">定时自动清理日志:</td>\
+                        <td width="85%">自动清理 <input type="text" sytle="text-align:center;" id="dellogdays" value="'+dellogdays+'" /> 天以前的日志记录 <button type="button" style="background:#0094FFFF;color:#fff;border:0;margin-left:20px;" onclick="demo.save_dellogsdays()">保存设置</button><br/><br/><a style="color:#D300FFFF" href="https://www.bt.cn/bbs/thread-32425-1-1.html" target="_blank">定时自动清理日志计划任务设置方法</a></td>\
+                      </tr>\
+                      <tr style="display:none">\
+                        <td colspan="2"> <button type="button" onclick="demo.rebackfilemoshi()">返回文件模式</button></td>\
+                      </tr>\
+                  </table>';  
+                if(rdata.dblx==null || rdata.dblx==undefined){
+                    var dblx=1;
+                }else{
+                    var dblx=rdata.dblx;
+                }
+                var sqllxtxt1,sqllxtxt2,sqllxtxt3;
+                if(dblx==1){
+                    sqllxtxt1='checked';
+                    var mysqlconfigbox="none";
+                }else if(dblx==2){
+                    sqllxtxt2='checked';
+                    var mysqlconfigbox="none";
+                }else if(dblx==3){
+                    sqllxtxt3='checked';
+                    var mysqlconfigbox="";
+                }
+                if(rdata.diydbname==null || rdata.diydbname==undefined){
+                    var diydbname="/www/server/panel/plugin/liuliangtongji/log.db";
+                }else{
+                    var diydbname=rdata.diydbname;
+                }
+                bodyhtml+='<table class="table table-hover animated bounceInLeft">\
+                      <tr>\
+                        <td colspan="2" style="font-size:16px;font-weight:bold;border-top:0;">数据库存储配置</td>\
+                      </tr>\
+                      <tr>\
+                        <td width="15%">方式一:</td>\
+                        <td width="85%"><label onclick="selectdblx(1)"><input type="radio" '+sqllxtxt1+' name="sqllx"> 面板SQLite数据库</label></td>\
+                      </tr>\
+                      <tr>\
+                        <td width="">方式二(默认):</td>\
+                        <td width=""><label onclick="selectdblx(2)"><input type="radio" '+sqllxtxt2+' name="sqllx"> 自定义SQLite数据库</label>, 自定义数据库路径及名称: <input type="text" id="diylogdbname" style="width:380px;" value="'+diydbname+'" /> <button type="button" style="background:#0094FFFF;color:#fff;border:0;margin-left:20px;" onclick="demo.savediydbname()">保存</button></td>\
+                      </tr>\
+                      <tr>\
+                        <td width="">方式三:</td>\
+                        <td width=""><label onclick="selectdblx(3)"><input type="radio" '+sqllxtxt3+' name="sqllx"> 远程MySQL数据库 (有开发能力的朋友建议使用此方式,此方式可以开发独立的客户端分析数据库中的日志)</label></td>\
+                      </tr>\
+                      <tr id="mysqlconfigbox" style="display:'+mysqlconfigbox+';">\
+                        <td style="border-top:0"></td>\
+                        <td style="border-top:0">MySQL服务器IP:<input type="text" id="mysql_host" value="'+rdata.mysql_host+'" />; 数据库名:<input type="text" id="mysql_db" value="'+rdata.mysql_db+'" />; 用户名:<input type="text" id="mysql_username" value="'+rdata.mysql_username+'" />;密码:<input type="text" id="mysql_psd" value="'+rdata.mysql_psd+'" /><br/><button type="button" style="background:#0094FFFF;color:#fff;border:0;margin-top:10px;" onclick="demo.savemysqlconfig()">保存配置,并设置为Mysql方式</button></td>\
+                      </tr>\
+                  </table>';  
+
+                }
+                $('.plugin_body').html(bodyhtml);
+            });
+        },
+        //保存自定义数据库名称及路径
+        savediydbname:function(){
+            var diylogdbname=$('#diylogdbname').val();
+            if(diylogdbname==''){
+                layer.msg('请输入自定义的数据库路径和名称', { icon: 2 });
+                return false;
+            }
+            if(diylogdbname.indexOf(".db") != -1){
+                request_plugin('liuliangtongji', 'set_config',{'key':'diydbname','value':diylogdbname}, function (rdata) {
+                    layer.msg('保存成功', { icon: 1 });
+                    request_plugin('liuliangtongji', 'setdatabasemoshi',{}, function (rdata) {}); 
+                })
+            }else{
+                layer.msg('请输入有效的数据库名称,以.db结尾,例如:log.db', { icon: 2 });
+                return false;
+            }
+        },
+        //保存mysql配置
+        savemysqlconfig:function(){
+            request_plugin('liuliangtongji', 'isinstallmysqldb',"", function (rdata) {
+                if(rdata.status==0){
+                    layer.msg('当前服务器环境没有安装MySQLdb模块,不能使用此方式', { icon: 2 });
+                    return false;
+                }
+                var mysql_host=$('#mysql_host').val();
+                var mysql_db=$('#mysql_db').val();
+                var mysql_username=$('#mysql_username').val();
+                var mysql_psd=$('#mysql_psd').val();
+                if(mysql_host==''){
+                    layer.msg('请输入MySQL服务器IP', { icon: 2 });
+                    return false;
+                }
+                if(mysql_db==''){
+                    layer.msg('请输入MySQL数据库名称', { icon: 2 });
+                    return false;
+                }
+                if(mysql_username==''){
+                    layer.msg('请输入MySQL数据库用户名', { icon: 2 });
+                    return false;
+                }
+                if(mysql_psd==''){
+                    layer.msg('请输入MySQL数据库密码', { icon: 2 });
+                    return false;
+                }
+                request_plugin('liuliangtongji', 'mysqlisconnect',{'mysql_host':mysql_host,'mysql_db':mysql_db,'mysql_username':mysql_username,'mysql_psd':mysql_psd}, function (rdata) {
+                    if(rdata.status==0){
+                        layer.msg('数据库配置出错,连接失败!', { icon: 2 });
+                        return false;
+                    }
+                    request_plugin('liuliangtongji', 'set_config',{'key':'mysql_host','value':mysql_host}, function (rdata) {
+                        request_plugin('liuliangtongji', 'set_config',{'key':'mysql_db','value':mysql_db}, function (rdata) {
+                            request_plugin('liuliangtongji', 'set_config',{'key':'mysql_username','value':mysql_username}, function (rdata) {
+                                request_plugin('liuliangtongji', 'set_config',{'key':'mysql_psd','value':mysql_psd}, function (rdata) {
+                                    //连接数据库测试
+                                    request_plugin('liuliangtongji', 'set_config',{'key':'dblx','value':"3"}, function (rdata) {
+                                        //连接数据库测试
+                                        layer.msg('保存成功', { icon: 1 });
+                                        request_plugin('liuliangtongji', 'setdatabasemoshi',{}, function (rdata) {});
+                                    });
+                                });
+                            });
+                        });
+                    });
+                })
+            });
+        },
+        //保存配置
+        save_config:function(){
+            var logpath=$('#logpath').val();
+            if(logpath==''){
+                layer.msg('请输入日志路径', { icon: 2 });
+                return false;
+            }
+            request_plugin('liuliangtongji', 'set_config',{'key':'logpath','value':logpath}, function (rdata) {
+                layer.msg('保存成功', { icon: 1 });
+            });
+        },
+        //返加文件模式
+        rebackfilemoshi:function(){
+            request_plugin('liuliangtongji', 'set_config',{'key':'moshi','value':0}, function (rdata) {
+                layer.msg('设置成功', { icon: 1 });
+            });
+        },
+        //清理日志
+        del_logs:function(){
+            var delstartdate=$('#delstartdate').val();
+            var delenddate=$('#delenddate').val();
+            if(delstartdate==''){
+                layer.msg('请输入清理起始日期', { icon: 2 });
+                return false;
+            }
+            if(delenddate==''){
+                layer.msg('请输入清理结束日期', { icon: 2 });
+                return false;
+            }
+            layer.confirm('清理之后不能恢复,确定要清理吗?', function(index){
+                request_plugin('liuliangtongji', 'del_logs',{'delstartdate':delstartdate,'delenddate':delenddate}, function (rdata) {
+                    layer.msg('清理完成!', { icon: 1 });
+                });
+            })
+        },
+        //保存自动清理天数
+        save_dellogsdays:function(){
+            var dellogdays=$('#dellogdays').val();
+            if(dellogdays==''){
+                layer.msg('请输入日志保存天数', { icon: 2 });
+                return false;
+            }
+            request_plugin('liuliangtongji', 'set_config',{'key':'dellogdays','value':dellogdays}, function (rdata) {
+                layer.msg('保存成功', { icon: 1 });
+            });
+        },
+        //站点排名
+        get_paiming:function(){
+            $('#plugin_body').html('<div style="width:100%;height:auto;overflow:hidden;" id="echart_body"></div>');
+            var canshu=demo.get_canshu();
+            request_plugin('liuliangtongji', 'get_paiming',{'s_datetime':canshu.s_datetime,'e_datetime':canshu.e_datetime}, function (rdata) {
+                var chartheight=rdata.y_zuobiao.length*50
+                if(chartheight<430){
+                    chartheight=430
+                }
+                $('#echart_body').css({'height':chartheight+'px'});
+                var liuliangchart = echarts.init(document.getElementById('echart_body'));
+                // 指定图表的配置项和数据
+                var option = {
+                    title: {
+                        text: '站点流量和访问量'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    legend: {
+                        data: ['流量统计', '访问人次']
+                    },
+                    xAxis: {
+                        type: 'value',
+                        boundaryGap: [0, 0.01]
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: rdata.y_zuobiao,
+                        axisLabel:{
+                            interval:0,
+                        },
+                        splitLine: {
+                            show: false
+                        },
+                        scale:true,
+                    },
+                    series: [
+                    {
+                        name: '流量统计',
+                        type: 'bar',
+                        data: rdata.lldata,
+                        itemStyle : { normal: {label : {show: true}}}
+                    },
+                    {
+                        name: '访问人次',
+                        type: 'bar',
+                        data: rdata.fwdata,
+                        itemStyle : { normal: {label : {show: true}}}
+                    }
+                    ]
+                };
+                liuliangchart.setOption(option);
+            });
+        },
+        //全站趋势
+        get_quanzhanqushi:function(){
+            var canshu=demo.get_canshu();
+            request_plugin('liuliangtongji', 'get_quanzhanqushi',{'s_datetime':canshu.s_datetime,'e_datetime':canshu.e_datetime}, function (rdata) {
+                var liuliangchart = echarts.init(document.getElementById('plugin_body'));
+                // 指定图表的配置项和数据
+                var option = {
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['访问量趋势','流量趋势']
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: rdata.x_zuobiao
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [
+                        {
+                            name:'访问量趋势',
+                            type:'line',
+                            stack: '访问量',
+                            smooth:true,
+                            data:rdata.fwdata,
+                            itemStyle : { normal: {label : {show: true}}}
+                        },
+                        {
+                            name:'流量趋势',
+                            type:'line',
+                            stack: '流量',
+                            smooth:true,
+                            data:rdata.lldata,
+                            itemStyle : { normal: {label : {show: true}}}
+                        }
+                    ]
+                };
+                liuliangchart.setOption(option);
+            });
+        }
+    }
+    //获取url参数
+    function getQueryString(href,name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+        var r = href.match(reg);
+        if (r != null) {
+        return unescape(r[2]);
+        }
+        return null;
+    }
+    //分页读取数据
+    $(".plugin_body").on('click','.page a',function(){
+        //阻止a跳转
+        var href=$(this).attr('href');
+        page = getQueryString(href,'p');
+        //调用程序
+        var cname=$('#pagefunction').val();
+        console.log(cname)
+        if(cname=='log'){
+            demo.get_log()
+        }else if(cname=='iplist'){
+            demo.get_iplist()
+        }else if(cname=='pageurl'){
+            demo.get_pageurl()
+        }
+        $(this).attr('href','#');
+        return false;
+    })
+    //选择数据库模式
+    function selectdblx(lx){
+        //保存到config
+        if(lx !=3){
+            request_plugin('liuliangtongji', 'set_config',{'key':'dblx','value':lx}, function (rdata) {
+                //layer.msg('保存成功', { icon: 1 });
+                if(lx==3){
+                    $('.plugin_body').find('#mysqlconfigbox').show();
+                }else{
+                    $('.plugin_body').find('#mysqlconfigbox').hide();
+                }
+                //当lx==2时, 需要生成db文件
+                if(lx==2){
+                    request_plugin('liuliangtongji', 'setdatabasemoshi',{}, function (rdata) {}); 
+                }
+            });    
+        }else{
+            $('.plugin_body').find('#mysqlconfigbox').show();
+        }
+        
+    }
+
+    //数组排序
+    function sortArr(a,b){
+        return (a.value - b.value)
+    }
+
+    //计算日期
+    function CurentTime(Date){
+        var now = Date;
+        var year = now.getFullYear();       //年
+        var month = now.getMonth() + 1;     //月
+        var day = now.getDate();            //日
+        var clock = year + "-";
+        if(month < 10)
+            clock += "0";
+        clock += month + "-";
+        if(day < 10)
+            clock += "0";
+        clock += day + " ";
+        return(clock);
+    }
+
+    //重新刷新数据
+    function regetdate(){
+        var functionname=$('#pagefunction').val();
+        if(functionname=='index'){
+            demo.get_index();
+        }else if(functionname=='iplist'){
+            demo.get_iplist();
+        }else if(functionname=='pageurl'){
+            demo.get_pageurl();
+        }else if(functionname=='log'){
+            demo.get_log();
+        }else if(functionname=='set'){
+            demo.get_set();
+        }else if(functionname=='echarts'){
+            demo.get_echarts();
+        }else if(functionname=='paiming'){
+            demo.get_paiming();
+        }else if(functionname=='quanzhanqushi'){
+            demo.get_quanzhanqushi();
+        }
+    }
+
+    /**
+     * 发送请求到插件
+     * 注意：除非你知道如何自己构造正确访问插件的ajax，否则建议您使用此方法与后端进行通信
+     * @param plugin_name    插件名称 如：demo
+     * @param function_name  要访问的方法名，如：get_logs
+     * @param args           传到插件方法中的参数 请传入数组，示例：{p:1,rows:10,callback:"demo.get_logs"}
+     * @param callback       请传入处理函数，响应内容将传入到第一个参数中
+     */
+    function request_plugin(plugin_name, function_name, args, callback, timeout) {
+        if (!timeout) timeout = 36000;
+        $.ajax({
+            type:'POST',
+            url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
+            data: args,
+            timeout:timeout,
+            success: function(rdata) {
+                $('.loadingbox').hide();
+                if (!callback) {
+                    layer.msg(rdata.msg, { icon: rdata.status ? 1 : 2 });
+                    return;
+                }
+                return callback(rdata);
+            },
+            error: function(ex) {
+                if (!callback) {
+                    layer.msg('请求过程发现错误!', { icon: 2 });
+                    return;
+                }
+                return callback(ex);
+            }
+        });
+    }
+
+    //第一次打开窗口时调用
+    var icurDate = new Date();
+    var inowdate=CurentTime(icurDate);
+    $('.searcTime .btime').val(inowdate+'00:00:01');
+    $('.searcTime .etime').val(inowdate+'23:59:59');
+    //获取配置项
+    request_plugin('liuliangtongji', 'get_config','', function (rdata) {
+        if(rdata.moshi==1){
+            $('.indexmianban').hide();
+            $('.databasemoshi').show();
+            demo.get_weblist();
+        }
+    });
+</script>

@@ -1,0 +1,34 @@
+#!/bin/bash
+# chkconfig: 2345 55 25
+# description: ossfs
+
+### BEGIN INIT INFO
+# Provides:          ossfs
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts ossfs
+# Description:       starts the ossfs
+### END INIT INFO
+
+panel_start()
+{
+bash /www/server/panel/plugin/ossfs/ossfs.sh
+}
+panel_stop()
+{
+echo ""> /www/server/panel/plugin/ossfs/ossfs.sh
+}
+case "$1" in
+        'start')
+
+                panel_start
+                ;;
+        'stop')
+                panel_stop
+                ;;
+        *)
+               echo "hellow"
+        ;;
+esac

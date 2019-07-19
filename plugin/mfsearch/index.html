@@ -1,0 +1,261 @@
+<style>
+    /*样式写这里*/
+    .mfsearch-table table tbody tr td span{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width:580px;
+        display:block;
+    }
+	
+	.bt-form .plugin_body  {
+        font-size:12px; 
+    }
+	
+	.bt-form .plugin_body label {
+        width:60px; 
+    }
+	.bt-form .plugin_body .sl300 {
+        width:300px; 
+    }
+	#show-Result code{margin-left:0; padding:0}
+	#show-Result a{cursor: pointer;}
+	#backupdir {display:none}
+
+</style>
+<div class="bt-form">
+    <div class="bt-w-main" >
+        <!--菜单部分-->
+        <div class="bt-w-menu bt-soft-menu" >
+            <p class="bgw" onclick="mfsearch.get_index()">搜索及批量修改</p>
+            <p onclick="mfsearch.show_me()">联系方式</p> 
+        </div>
+        <!--内容部分-->
+		
+        <div class="bt-w-con pd15">
+            <div class="plugin_body mf-tab1">
+			<form id="mfsearchForm" onsubmit="return false">
+				<div style="margin-bottom:1px"> 
+					<label> 查找目标: </label> <input name="stext" class="sl300 bt-input-text mr5"  required="required"> 
+					<button class="btn btn-success btn-sm" onclick="mfsearch.get_search()">全部查找</button>
+				</div>
+				<div  style="margin-bottom:1px"> 
+					<label> 替换为 : </label> <input name="etext" onchange="this.form.isbackup.disabled=!this.value" class="sl300 bt-input-text mr5"  > 
+					<button  class="btn btn-default btn-sm" onclick="mfsearch.get_replace()">在文件中替换</button>
+					- 
+					<label style="width:110px;display:;" class="pre-backup" >
+						<input name="isbackup" value="1"  type="checkbox" checked="true" disabled=true /><span>替换前先备份 </span>
+						<span id="backupdir" data-path="" class="glyphicon glyphicon-folder-open" onclick="mfsearch.openBackPath(this)"></span>
+						<!-- <a href="#" onclick="return false" class="bt-ico-ask" style="cursor: pointer;">?</a> -->
+					</label> 
+				</div>
+				<div  style="margin-bottom:1px"> 
+					<label> 文件类型: </label> <input name="exts"  class="sl300 bt-input-text mr5"  placeholder="*.py;*.php;*.html;*.asp" value="*.php;*.html" required="required">
+
+					
+				</div>
+				<div  style="margin-bottom:1px"> 
+					<label> 目录: </label> <input name="folder" class="sl300 bt-input-text mr5 server_path" placeholder="/www/wwwroot"  required="required"> 
+					<span data-id="folder" class="glyphicon cursor mr5 glyphicon-folder-open" onclick="bt.select_path('server_path')"></span>
+					<label style="width:80px"><input name="subfold" value="1" type="checkbox" /><span>包含子目录</span></label> 
+				</div>
+				<div  style="margin-bottom:1px"> 
+					<label style="width:80px"><input name="isword" value="1" type="checkbox" /><span>全词匹配 </span> </label> 
+					<label style="width:80px"><input name="iscase" value="1"  type="checkbox" /><span>匹配大小写 </span></label> 
+					
+					
+				</div>
+				<div  style="margin-bottom:1px"> 
+					<label> 查找模式: </label> 
+					<label style="width:50px"><input type="radio" name="mode" value="0" checked=true /><span >普通 </span></label> 
+					<!--				
+					<label style="width:140px"><input type="radio" name="mode" value="1" /><span>扩展(\n,\r,\t,\0,\x...) </span></label> 
+					-->
+					<label style="width:73px"><input type="radio" name="mode" value="2" /><span>正则表达式</span></label>
+					<!--
+					(<label style="width:63px"><input name="newline" disabled=true value="1" type="checkbox" /><span>匹配新行</span></label>)
+					-->
+				</div>
+			</form>
+			<hr />
+			<div id="show-rs-tpl" style="display:none">
+				<div>
+					<a style="cursor: pointer;" onclick="GetFiles(1,'name')">文件名
+					<span data-id="status" class="glyphicon glyphicon-triangle-bottom" style="margin-left:5px;color:#bbb"></span></a>
+				</div>
+				<div>
+				<br>
+				</div>
+			</div>
+			<div id="show-Result">
+				
+			</div>
+			</div>
+			<div class="plugin_body mf-tab3" style="display:none">
+				<div style='text-align:center;'>
+				<h1 style='text-align:center;'>牧飞(ypdh@qq.com tel:15712150708)</h1>
+				<hr>
+				<img src='/mfsearch/static/imgs/weixin-shoukuang2.jpg' width="300px"  onerror="this.src='//www.mufei.ltd/mufei/weixin-shoukuang2.jpg'" />
+				
+				
+				</div>
+			</div>
+		</div>
+    </div>
+</div>
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+<script type="text/javascript">
+
+    //定义窗口尺寸
+    $('.layui-layer-page').css({ 'width': '900px' });
+
+    //左测菜单切换效果
+    $(".bt-w-menu p").click(function () {
+        $(this).addClass('bgw').siblings().removeClass('bgw')
+    });
+	
+	$('[name="mode"]').click(function () {
+	    var m = mfsearchForm.mode, w=mfsearchForm.isword, n=mfsearchForm.newline;
+        if(m.value==2){
+			if(w){w.disabled=true; w.checked=false;}
+			if(n)n.disabled=false;
+		}else{
+			if(n){n.checked=false; n.disabled=true;}
+			if(w)w.disabled=false;
+		}
+    });
+
+	var showResultFn = function(){
+		$('#show-Result a').click(function(){
+			var o=this,sp=o.getElementsByTagName('span')[0],
+				s1='glyphicon-triangle-top', s2='glyphicon-triangle-bottom', 
+				k = sp.classList.contains(s1);
+			if(k){
+				sp.classList.remove(s1)
+				sp.classList.add(s2); $(o.nextElementSibling).hide()
+			}else{
+				sp.classList.remove(s2)
+				sp.classList.add(s1); $(o.nextElementSibling).show()
+			}
+			//alert(o.parentElement.nextElementSibling.innerHTML)
+		})
+	}
+    /**
+     * 插件交互对象
+     * 您的所有JS代码可以写在里面
+     * 若不习惯JS的面向对象编程，可删除此对象，使用传统函数化的方式编写
+     * */
+    var mfsearch = {
+	
+        //构造概览内容
+        get_index: function () {
+           $('.mf-tab1').show();$('.mf-tab3').hide()
+        },
+		
+        show_me: function () {
+            $('.mf-tab1').hide();$('.mf-tab3').show()
+        },
+		openBackPath :function(obj){
+			var path=$(obj).attr('data-path');
+			openPath(path);
+		},
+		get_search: function(){
+			var d=$("#mfsearchForm").serializeArray();
+			$('#mfsearchForm button').attr('disabled', true); $('#show-Result').html("服务器正在匹配操作,请稍后...");
+			request_plugin('mfsearch', 'get_search', d, function (rdata) {
+			    $('#mfsearchForm button').attr('disabled', false);
+			    console.log(rdata);
+				var d=rdata.data,Ls=[];
+				if(!rdata.total){
+					$('#show-Result').html("无匹配内容");
+					return;
+				}
+				var n=0;
+				for(var f in d){
+				    ++n;
+					var L=['<div>','<a data-n="p'+n+'"', 'data-f="'+f+'n'+'">',
+					       '<span class="glyphicon glyphicon-triangle-top"></span>',
+						   f,
+						   '&nbsp;&nbsp;&nbsp;&nbsp;<label class="btlink" href="javascript:;" onclick="OnlineEditFile(0,', "'", f, "'", ')">编辑</label>',
+						   '</a><div style="margin-left:10px"><code>'
+						  ]
+					for(var i  in d[f]){
+						L.push("line "+i+": "+$('<div>').text(d[f][i]).html()+'\r\n<br>')
+					}
+					L.push("</code></div></div>")
+					Ls.push(L.join(''))
+				}
+				$('#show-Result').html(Ls.join(''));
+				showResultFn();
+            });
+			return false;
+		},
+		get_replace: function(){
+			var d=$("#mfsearchForm").serializeArray();
+			if(!confirm("替换操作具有危险性,请确认"))return false;
+			$('#mfsearchForm button').attr('disabled', true);  $('#show-Result').html("服务器正在替换操作,请稍后...");
+			request_plugin('mfsearch', 'get_replace', d, function (rdata) {
+				$('#mfsearchForm button').attr('disabled', false);
+			    console.log(rdata);
+				var d=rdata.data,Ls=[];
+				if(!rdata.total){
+					$('#show-Result').html("无匹配内容");
+					return;
+				}
+				var n=0;
+				for(var f in d){
+				    ++n;
+					var L=['<div>','<a data-n="p'+n+'"', 'data-f="'+f+'n'+'">',
+					       '<span class="glyphicon glyphicon-triangle-top"></span>',
+						   d[f],
+						   '&nbsp;&nbsp;&nbsp;&nbsp;<label class="btlink" href="javascript:;" onclick="OnlineEditFile(0,', "'", d[f], "'", ')">编辑</label>',
+						   '</a></div>'
+						  ]
+					Ls.push(L.join(''))
+				}
+				$('#show-Result').html(Ls.join(''));
+				if(rdata.backupdir){
+				    $('#backupdir').attr('data-path', rdata.backupdir).show()
+				}
+            });
+			return false;
+		}
+
+    }
+
+    /**
+     * 发送请求到插件
+     * 注意：除非你知道如何自己构造正确访问插件的ajax，否则建议您使用此方法与后端进行通信
+     * @param plugin_name    插件名称 如：mfsearch
+     * @param function_name  要访问的方法名，如：get_logs
+     * @param args           传到插件方法中的参数 请传入数组，示例：{p:1,rows:10,callback:"mfsearch.get_logs"}
+     * @param callback       请传入处理函数，响应内容将传入到第一个参数中
+     */
+    function request_plugin(plugin_name, function_name, args, callback, timeout) {
+        if (!timeout) timeout = 360000;
+        $.ajax({
+            type:'POST',
+            url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
+            data: args,
+            timeout:timeout,
+            success: function(rdata) {
+                if (!callback) {
+                    layer.msg(rdata.msg, { icon: rdata.status ? 1 : 2 });
+                    return;
+                }
+                return callback(rdata);
+            },
+            error: function(ex) {
+                if (!callback) {
+                    layer.msg('请求过程发现错误!', { icon: 2 });
+                    return;
+                }
+                return callback(ex);
+            }
+        });
+    }
+
+    //第一次打开窗口时调用
+    //mfsearch.get_index();
+
+</script>

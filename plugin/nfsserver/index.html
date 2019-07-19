@@ -1,0 +1,457 @@
+<style>
+    .box_conter{
+        padding:20px 25px;
+    }
+    .btn_group{
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+    .btn_group span{
+        display: inline-block;
+        text-align: center;
+        height: 32px;
+        line-height: 30px;
+        border: #ddd 1px solid;
+        padding: 0 20px;
+        margin-left: -1px;
+        cursor: pointer;
+        position: relative;
+    }
+    .btn_group .ative{
+        background: #20a53a;
+        color: #fff;
+    }
+    .server_table td span{
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 200px;
+    }
+</style>
+<!-- <span id="triangle-up"></span> -->
+<div id="nfsserver" class="bt-form">
+    <div class="bt-w-main">
+        <div class="bt-w-menu">
+            <p class="bgw">客户端</p>
+            <p >服务端</p>
+        </div>
+        <div class="bt-w-con pd15">
+            <div class="bt-box divtable" >
+                <button class="btn btn-sm btn-success mb15 client_dir_event">挂载共享目录</button>
+                <table class="table table-hover">
+                    <thead><tr><th>挂载目录</th><th style="text-align: right">操作</th></tr></thead>
+                    <tbody class="client_table"></tbody>
+                </table>
+            </div>
+            <div class="bt-box divtable" style="display: none;">
+                <button class="btn btn-sm btn-success mb15 creater_share_event">创建共享</button>
+                <table class="table table-hover">
+                    <thead><tr><th>共享目录</th><th>IP/域名</th><th>配置参数</th><th style="text-align: right">操作</th></tr></thead>
+                    <tbody class="server_table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+<script>
+    var nfsserver = {
+        layer_alert:'',
+        config:{
+            async: "[async]数据会先暂存于内存中，而非直接写入硬盘",
+            sync: "[sync]数据同步写入到内存与硬盘中",
+            all_squash: "[all_squash]客户机上的任何用户访问该共享目录时都映射成匿名用户",
+            no_all_squash: "[no_all_squash]保留共享文件的UID和GID(默认)",
+            no_root_squash: "[no_root_squash]客户机用root访问该共享文件夹时，不映射root用户",
+            root_squash: "[root_squash]root映射成anonymous权限(默认)",
+            ro:"[ro]只读",
+            rw: "[rw]读写"
+        },
+        ip_path:{},
+        load:function(){
+            $('.bt-w-menu p').click(function(){
+                var index = $(this).index();
+                $(this).addClass('bgw').siblings().removeClass('bgw');
+                $('.bt-w-con .bt-box').eq(index).show().siblings().hide();
+                if(index == 0){
+                    nfsserver.get_client_mount_list();
+                }else{
+                    nfsserver.get_server_nfs_list();
+                }
+            });
+            
+            $('.client_dir_event').click(function(){
+                nfsserver.layer_alert = layer.open({
+                    type: 1,
+                    title: '挂载共享目录',
+                    area: "400px",
+                    closeBtn: 2,
+                    content:"<div class='bt-form pd20 pb70'>\
+                                <div class='line'>\<span class='tname'>挂载目录</span><div class='info-r  ml0'><input name='path' class='bt-input-text mr5 server_path' type='text' style='width:200px'><span data-id='path' class='glyphicon cursor ml5 glyphicon-folder-open' onclick='bt.select_path(&quot;server_path&quot;)'></span></div></div>\
+                                <div class='line'><span class='tname'>密钥</span><div class='info-r  ml0'><textarea class='bt-input-text mr20' name='misc' style='width:200px;height:60px;line-height:22px'></textarea></div></div>\
+                                <div class='bt-form-submit-btn'>\
+                                    <button type='button' class='btn btn-danger btn-sm bt-cancel layer_cancel'>"+lan.public.cancel+"</button>\
+                                    <button type='button' id='toSubmit' class='btn btn-success btn-sm add_mount_submit'>"+lan.public.ok+"</button>\
+                                </div>\
+                            </div>",
+                    success:function(layero,index){
+                        $('.layer_cancel').click(function(){
+                            layer.close(index);
+                        });
+                        $('.add_mount_submit').click(function(){
+                            var misc = $('textarea[name="misc"]').val(),path =$('input[name="path"]').val();
+                            if(path == ''){
+                                layer.msg('请输入挂载目录！',{icon:2});
+                                return false;
+                            }
+                            if(misc == ''){
+                                layer.msg('请输入挂载共享目录密钥！',{icon:2});
+                                return false;
+                            }
+                            var loadT= layer.load();
+                            nfsserver.add_client_mount({
+                                misc:misc,
+                                path:path
+                            },function(res){
+                                layer.close(loadT);
+                                if(res.status){
+                                    layer.close(index);
+                                    nfsserver.get_client_mount_list();
+                                }
+                            });
+                        });
+                    }
+                });
+            });
+            
+            $('.creater_share_event').click(function(){
+                nfsserver.layer_alert = layer.open({
+                    type: 1,
+                    title: '创建共享目录',
+                    area: "600px",
+                    closeBtn: 2,
+                    content:"<div class='bt-form pd20 pb70'>\
+                                <div class='line'>\
+                                    <span class='tname'>共享目录</span><div class='info-r  ml0'><input name='path' id='server_path' class='bt-input-text mr5' type='text' style='width:250px' value='/www/wwwroot'><span data-id='path' class='glyphicon cursor mr5 glyphicon-folder-open' onclick='bt.select_path(\"server_path\")'></span></div>\
+                                </div>\
+                                <div class='line'>\
+                                    <span class='tname'>访问限制</span>\
+                                    <div class='info-r  ml0'>\
+                                        <select class='bt-input-text c5 mr5' name='limit' style='width:160px;'>\
+                                            <option value='0'>允许全部</option>\
+                                            <option value='1'>指定IP段</option>\
+                                            <option value='2'>指定IP</option>\
+                                            <option value='3'>指定泛域名</option>\
+                                            <option value='4'>指定域名</option>\
+                                        </select>\
+                                    </div>\
+                                </div>\
+                                <div class='line limit_type' style='display:none'>\
+                                    <span class='tname'>IP地址</span>\
+                                    <div class='info-r  ml0'>\
+                                        <input name='ip' class='bt-input-text mr5' type='text' style='width:250px' value='*'>\
+                                    </div>\
+                                </div>\
+                                <div class='line'>\
+                                    <span class='tname'>读取方式</span>\
+                                    <div class='info-r  ml0'>\
+                                        <select class='bt-input-text c5 mr5' name='ret_1' style='width:160px;'>\
+                                            <option value='ro'>只读</option>\
+                                            <option value='rw'>读写</option>\
+                                        </select>\
+                                    </div>\
+                                </div>\
+                                <div class='line'>\
+                                    <span class='tname'>写入方式</span>\
+                                    <div class='info-r ml0'>\
+                                        <select class='bt-input-text c5 mr5' name='ret_2' style='width:160px;'>\
+                                            <option value='*'>默认</option>\
+                                            <option value='sync'>sync</option>\
+                                            <option value='async'>async</option>\
+                                        </select>\
+                                        <span style='color:#999'>*可忽略</span>\
+                                    </div>\
+                                </div>\
+                                <div class='line'>\
+                                    <span class='tname'>权限</span>\
+                                    <div class='info-r  ml0'>\
+                                        <select class='bt-input-text c5 mr5' name='ret_3' style='width:160px;'>\
+                                            <option value='*'>默认</option>\
+                                            <option value='root_squash'>root_squash</option>\
+                                            <option value='no_root_squash'>no_root_squash</option>\
+                                        </select>\
+                                        <span style='color:#999'>*可忽略</span>\
+                                    </div>\
+                                </div>\
+                                <div class='line'>\
+                                    <span class='tname'>映射方式</span>\
+                                    <div class='info-r  ml0'>\
+                                        <select class='bt-input-text c5 mr5' name='ret_4' style='width:160px;'>\
+                                            <option value='*'>默认</option>\
+                                            <option value='no_all_squash'>no_all_squash</option>\
+                                            <option value='all_squash'>all_squash</option>\
+                                        </select>\
+                                        <span style='color:#999'>*可忽略</span>\
+                                    </div>\
+                                </div>\
+                                <div class='bt-form-submit-btn'>\
+                                    <button type='button' class='btn btn-danger btn-sm bt-cancel layer_cancel'>"+lan.public.cancel+"</button>\
+                                    <button type='button' id='toSubmit' class='btn btn-success btn-sm add_limit_submit'>" + lan.public.ok +"</button>\
+                                </div>\
+                                <ul class='help-info-text c7'>\
+                                    <li>写入方式: [sync] 数据同步写入到内存与硬盘中, [async] 数据会先暂存于内存中，而非直接写入硬盘</li>\
+                                    <li>权限:[root_squash] root映射成anonymous权限(默认), [no_root_squash] 客户机用root访问该共享文件夹时，不映射root用户</li>\
+                                    <li>映射方式: [no_all_squash] 保留共享文件的UID和GID(默认), [all_squash] 客户机上的任何用户访问该共享目录时都映射成匿名用户</li>\
+                                </ul>\
+                            </div>",
+                    success: function(layero, index){
+                        $('[name="limit"]').change(function(){
+                            switch($(this).val()){
+                                case '0':
+                                    $('.limit_type').hide();
+                                    $('[name="ip"]').val('*');
+                                break;
+                                case '1':
+                                    $('.limit_type').show().find('.tname').html('IP段');
+                                break;
+                                case '2':
+                                    $('.limit_type').show().find('.tname').html('IP地址');
+                                break;
+                                case '3':
+                                    $('.limit_type').show().find('.tname').html('泛域名');
+                                break;
+                                case '4':
+                                    $('.limit_type').show().find('.tname').html('域名');
+                                break;
+                            }
+                            $('.limit_type input').val('');
+                        })
+                        $('.add_limit_submit').click(function(){
+                            var path = $('[name="path"]').val(),type = $('[name="limit"]').val(),ip = $('[name="ip"]').val(),ret = [];
+                            ret.push($('[name="ret_1"]').val())
+                            if($('[name="ret_2"]').val() != '*') ret.push($('[name="ret_2"]').val());
+                            if($('[name="ret_3"]').val() != '*') ret.push($('[name="ret_3"]').val());
+                            if($('[name="ret_4"]').val() != '*') ret.push($('[name="ret_4"]').val());
+                            var loadT= layer.load();
+                            nfsserver.add_server_nfs_dir({
+                                path:path,
+                                type:type,
+                                ip:ip,
+                                ret:JSON.stringify(ret)
+                            },function(res){
+                                layer.close(loadT)
+                                if(res.status){
+                                    layer.close(index);
+                                    nfsserver.get_server_nfs_list();
+                                }
+                            })
+                        });
+                        $('.layer_cancel').click(function(){
+                            layer.close(index);
+
+                        });
+                    }
+                });
+            });
+            
+            $('.server_table').on('click','.get_misc_view',function(){
+                var id = $(this).attr('data-id'),tab = "";
+                nfsserver.get_server_nfs_ipaddress(function(res){
+                    if(res.status == false) {
+                        layer.msg(res.msg,{icon:2});
+                        return false;
+                    }
+                    nfsserver.ip_path = res;
+                    if(nfsserver.ip_path.wai != ""){
+                        tab += '<span class="ative" data-ip="'+nfsserver.ip_path.wai+'">外网</span>';
+                    }
+                    if(nfsserver.ip_path.nei.length != 0){
+                        for(var i = 0 ;i<nfsserver.ip_path.nei.length;i++){
+                            var ative = nfsserver.ip_path.wai == ""  && i == 1 ? " class='ative' ":" "
+                            for(var j in nfsserver.ip_path.nei[i]){
+                                tab +="<span"+ ative +"data-ip='"+ nfsserver.ip_path.nei[i][j] +"'>内网[" + j +"]</span>"
+                            }
+                        }
+                    }
+                    console.log(tab);
+                    layer.open({
+                        type: 1,
+                        title: '生成密钥',
+                        closeBtn: 2,
+                        content:"<div class='box_conter'>\
+                                <div class='btn_group'>"+ tab +"</div>\
+                                <div class='btn_text'><textarea class='bt-input-text ' name='misc' readonly='readonly' style='background-color: #ededed;width:240px;height:100px;line-height:22px'></textarea></div>\
+                            </div>",
+                        success:function(layero,index){
+                            console.log(layero);
+                            $('.btn_group span').click(function(){
+                                var ip = $(this).attr('data-ip');
+                                $(this).addClass('ative').siblings().removeClass('ative');
+                                nfsserver.create_server_nfs({
+                                    id:id,
+                                    ip:ip
+                                },function(res){
+                                    if(res.status){
+                                        $('.btn_text textarea').val(res.msg);
+                                    }
+                                });
+                            });
+                            $('.btn_group .ative').click();
+                        }
+                    })
+                });
+            });
+
+            nfsserver.get_client_mount_list();
+        },
+        // 获取服务端权限配置文件
+        get_server_config:function(callback){
+            request_plugin('nfsserver','ReturnSitings',{},function(res){
+                console.log(res);
+            });
+        },
+        // 添加服务端共享目录
+        add_server_nfs_dir:function(obj,callback){
+            request_plugin('nfsserver','SetConfig',{path:obj.path,type:obj.type,ip:obj.ip,ret:obj.ret},function(res){
+                layer.msg(res.msg, { icon: res.status ? 1 : 2 });
+                if(callback) callback(res);
+            });
+        },
+        // 获取服务端共享列表
+        get_server_nfs_list:function(callback){
+            var loadT = layer.load();
+            request_plugin('nfsserver','GetUser',{},function(res){
+                layer.close(loadT);
+                if(callback) callback();
+                var _table = '';
+                if(res.status){
+                    for(var i = 0 ; i < res.msg.length;i++){
+                        var item = res.msg[i],authority = '';
+                        for(var j = 0; j < item.ret.length;j++){
+                            authority += nfsserver.config[item.ret[j]] + (j != item.ret.length -1?'、':'');
+                        }
+                        _table += '<tr>\
+                            <td><a href="javascript:openPath(\''+ item.path +'\');" target="_blank" class="btlink"  title="打开目录'+ item.path +'">'+ item.path +'</a></td>\
+                            <td>'+ (item.ip == '*'?'允许全部访问':item.ip) +'</td>\
+                            <td><span title="'+authority+'">'+ authority +'</span></td>\
+                            <td class="text-right">\
+                                <a href="javascript:;" title="获取共享密钥" class="btlink get_misc_view" data-id="'+ item.id +'">密钥</a>&nbsp;|&nbsp;\
+                                <a href="javascript:;" title="删除共享" class="btlink " onclick="nfsserver.del_server_nfs_dir(\''+ item.id +'\',\''+item.path+'\')">删除</a>\
+                            </td>\
+                            </tr>'
+                    }
+                    $('.server_table').html(_table);
+                }else{
+                    $('.server_table').html('');
+                }
+            });
+        },
+        // 删除服务端共享目录
+        del_server_nfs_dir:function(id,path){
+            layer.confirm('是否删除共享['+ path +']吗?',{title:'删除共享['+ path +']',icon:0,closeBtn: 2,shift: 5},function(){
+                var loadT = layer.load();
+                request_plugin('nfsserver','DelUserConfig',{id:id},function(res){
+                    layer.close(loadT);
+                    layer.msg(res.msg, { icon: res.status ? 1 : 2 });
+                    nfsserver.get_server_nfs_list();
+                });
+            });
+        },
+        // 获取服务端ip地址
+        get_server_nfs_ipaddress:function(callback){
+            var loadT = layer.load();
+            if(JSON.stringify(nfsserver.ip_path) == '{}'){
+                request_plugin('nfsserver','IPaddress',{},function(res){
+                    layer.close(loadT);
+                    if(callback) callback(res);
+                });
+            }else{
+                layer.close(loadT);
+                if(callback) callback(nfsserver.ip_path);
+            }
+        },
+        // 创建服务端密钥
+        create_server_nfs:function(obj,callback){
+            var loadT = layer.load();
+            request_plugin('nfsserver','GetMisc',{id:obj.id,ip:obj.ip},function(res){
+                layer.close(loadT);
+                if(!res.status) layer.msg(res.msg,{icon:2});
+                if(callback) callback(res)
+            });
+        },
+        
+        // 添加客户端挂载(obj.misc:密钥,obj.path:挂载目录)
+        add_client_mount:function(obj,callback){
+            request_plugin('nfsserver','Client',{misc:obj.misc,path:obj.path},function(res){
+                layer.msg(res.msg, { icon: res.status ? 1 : 2 });
+                if(callback) callback(res);
+            });
+        },
+        // 获取客户端挂载列表
+        get_client_mount_list:function(){
+            var loadT = layer.load();
+            request_plugin('nfsserver','GetSystemSize',{},function(res){
+                layer.close(loadT);
+                var _table = '';
+                if(res.status){
+                    for(var i in res.msg){
+                        _table += '<tr>\
+                            <td><a href="javascript:openPath(\''+i+'\');" target="_blank" class="btlink"  title="打开目录'+ i +'">'+ i +'</a></td>\
+                            <td><a href="javascript:;" title="卸载挂载目录" class="btlink pull-right" onclick="nfsserver.del_client_mount(\''+i+'\')">删除</a></td>\
+                        </tr>'
+                    }
+                    $('.client_table').html(_table);
+                }else{
+                    $('.client_table').html('');
+                }
+            });
+        },
+        // 删除客户端挂载
+        del_client_mount:function(path){
+            layer.confirm('是否删除挂载目录['+ path +']吗?',{title:'删除挂载目录['+ path +']',icon:0,closeBtn: 2,shift: 5},function(){
+                var loadT = layer.load();
+                request_plugin('nfsserver','Umount',{path:path},function(res){
+                    layer.close(loadT);
+                    layer.msg(res.msg, { icon: res.status ? 1 : 2 });
+                    nfsserver.get_client_mount_list();
+                });
+            });
+        },
+    }
+    nfsserver.load();
+/*                                                       
+    * 发送请求到插件
+    * 注意：除非你知道如何自己构造正确访问插件的ajax，否则建议您使用此方法与后端进行通信
+    * @param plugin_name    插件名称 如：demo
+    * @param function_name  要访问的方法名，如：get_logs
+    * @param object         传到插件方法中的参数 请传入对象，示例：{p:1,rows:10,callback:"demo.get_logs"}
+    * @param callback       请传入处理函数，响应内容将传入到第一个参数中
+*/
+    function request_plugin(plugin_name, function_name, args, callback, timeout) {
+        if (!timeout) timeout = 3600;
+        $.ajax({
+            type:'POST',
+            url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
+            data: args,
+            timeout:timeout,
+            success: function(rdata) {
+                if (!callback) {
+                    layer.msg(rdata.msg, { icon: rdata.status ? 1 : 2 });
+                    return;
+                }
+                return callback(rdata);
+            },
+            error: function(ex) {
+                if (!callback) {
+                    layer.msg('请求过程发现错误!', { icon: 2 });
+                    return;
+                }
+                return callback(ex);
+            }
+        });
+    }
+</script>
+    

@@ -1,0 +1,200 @@
+<style>
+    /*样式写这里*/
+    .pysqliteadmin-table table tbody tr td span{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width:580px;
+        display:block;
+    }
+   .pysqliteadmin hr {
+		margin-top: 10; 
+		margin-bottom: 10; 
+	}
+	#sPath{min-width:432px;}
+	#folder{min-width:300px;}
+	#show-Result a{cursor:pointer;}
+</style>
+<div class="bt-form pysqliteadmin">
+    <div class="bt-w-main" >
+        <!--菜单部分-->
+        <div class="bt-w-menu bt-soft-menu" >
+            <p class="bgw" onclick="pysqliteadmin.get_index()">管理(manage)</p>
+            <p onclick="pysqliteadmin.show_me()">联系方式</p> 
+        </div>
+        <!--内容部分-->
+		
+        <div class="bt-w-con pd15">
+            <div class="plugin_body mf-tab1">
+			
+				<div style="margin-bottom:1px"> 
+					<label> 文件名(包含路径): </label> <input id="sPath" class="sl300 bt-input-text mr5"> 
+					<button class="btn btn-success btn-sm" onclick="pysqliteadmin.get_manage()">管理(manage)</button>
+				</div>
+				<hr />
+				
+				<div  style="margin-bottom:1px"> 
+					<label> 目录: </label> <input  id="folder" name="folder" class="sl300 bt-input-text mr5 server_path"  value="/www/wwwroot"> 
+					<span data-id="folder" class="glyphicon cursor mr5 glyphicon-folder-open" onclick="bt.select_path('server_path')"></span>
+					<label> 文件类型: </label> <input id="exts"  class="sl300 bt-input-text mr5"    value="*.db;*.sqlite;*sqlite3" required="required">	
+					<button class="btn btn-success btn-sm" onclick="pysqliteadmin.get_scan()">扫描(scan)</button>
+				</div>
+			
+			<hr />
+			<div id="show-rs-tpl" style="display:none">
+				<div>
+					<a style="cursor: pointer;" onclick="GetFiles(1,'name')">文件名
+					<span data-id="status" class="glyphicon glyphicon-triangle-bottom" style="margin-left:5px;color:#bbb"></span></a>
+				</div>
+				<div>
+				<br>
+				</div>
+			</div>
+			<div id="show-Result">
+				
+			</div>
+			</div>
+			<div class="plugin_body mf-tab3" style="display:none">
+				<div style='text-align:center;'>
+				<h3 style='text-align:center;'>牧飞(ypdh@qq.com tel:15712150708 Q群:226895834)</h3>
+				<hr>
+				<a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=05716e05d6ea059e6217cf22a780c1d71b1dae6fa99bd38e8af176e78405b8eb"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="宝塔开发" title="宝塔开发"></a>
+				(免费)
+				<hr>
+				<img src='/pysqliteadmin/static/imgs/weixin-shoukuang2.jpg' width="300px"  onerror="this.src='//www.mufei.ltd/mufei/weixin-shoukuang2.jpg'" />
+				
+				</div>
+			</div>
+		</div>
+    </div>
+</div>
+
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+<script type="text/javascript">
+
+    //定义窗口尺寸
+    $('.layui-layer-page').css({ 'width': '900px' });
+
+    //左测菜单切换效果
+    $(".bt-w-menu p").click(function () {
+        $(this).addClass('bgw').siblings().removeClass('bgw')
+    });
+
+    /**
+     * 插件交互对象
+     * 您的所有JS代码可以写在里面
+     * 若不习惯JS的面向对象编程，可删除此对象，使用传统函数化的方式编写
+     * */
+    var pysqliteadmin = {
+        //构造概览内容
+        //构造概览内容
+        get_index: function () {
+           $('.mf-tab1').show();$('.mf-tab3').hide()
+        },
+		
+        show_me: function () {
+            $('.mf-tab1').hide();$('.mf-tab3').show()
+        },
+		
+		get_manage: function(db_file){
+		    var sPath = db_file || $('#sPath').val();
+		    $('.pysqliteadmin button').attr('disabled',true)
+			request_plugin('pysqliteadmin', 'set_db', {db_file:sPath}, function (rdata) {
+				$('.pysqliteadmin button').attr('disabled',false)
+				if(rdata.error){
+					layer.msg(rdata.error, { icon: 2 });
+				}else{
+					window.open('/pysqliteadmin/home/','_pyblank').focus();
+				}
+			})
+		},
+		get_scan: function(){
+			var folderPth = $('#folder').val(), exts=$('#exts').val();
+			if(!folderPth){layer.msg("目录不能为空", { icon: 2 }); return}
+			if(!exts){layer.msg("文件类型不能为空", { icon: 2 }); return}
+			$('.pysqliteadmin button').attr('disabled',true);
+			request_plugin('pysqliteadmin', 'get_scan', {folder:folderPth, exts:exts}, function (rdata) {
+				$('.pysqliteadmin button').attr('disabled',false)
+				if(rdata.error){
+					layer.msg(rdata.error, { icon: 2 });
+				}else{
+					//window.open('/pysqliteadmin/home/','_pyblank').focus();
+					
+					var rs=rdata.result, log_body = '';
+					for (var i = 0; i < rs.length; i++) {
+						log_body += '<tr><td><a onclick="pysqliteadmin.get_manage('
+						               +"'" +rs[i] + "')"+'"'+">管理</a>"
+						+ '</td><td><span>' + rs[i] + '</span></td></tr>'
+					}
+
+					var my_body = '<div class="pysqliteadmin-table"><div class="divtable">'
+								+'<table class="table table-hover">'
+									+'<thead>'
+										+'<tr><th width="150">操作</th><th>sqlite3文件路径(PATH)</th></tr>'
+									+'</thead>'
+									+'<tbody>'+ log_body + '</tbody>'
+								+'</table>'
+						+ '</div></div>'
+						//+ '</div><div class="page" style="margin-top:15px">' + rdata.page + '</div</div>';
+
+					$('#show-Result').html(my_body);
+				}
+			})
+		},
+
+        /**
+         * 获取面板日志
+         * @param p 被获取的分页
+         */
+        get_logs : function (p) {
+            if (p == undefined) p = 1;
+            request_plugin('pysqliteadmin', 'get_logs', { p: p, callback: 'pysqliteadmin.get_logs' }, function (rdata) {
+                var log_body = '';
+                for (var i = 0; i < rdata.data.length; i++) {
+                    log_body += '<tr><td>' + rdata.data[i].addtime + '</td><td><span title="' + rdata.data[i].log + '">' + rdata.data[i].log + '</span></td></tr>'
+                }
+
+                var my_body = '<div class="pysqliteadmin-table"><div class="divtable">'
+                            +'<table class="table table-hover">'
+                                +'<thead>'
+                                    +'<tr><th width="150">时间</th><th>详情</th></tr>'
+                                +'</thead>'
+                                +'<tbody>'+ log_body + '</tbody>'
+                            +'</table>'
+                    + '</div><div class="page" style="margin-top:15px">' + rdata.page + '</div</div>';
+
+                $('.plugin_body').html(my_body);
+            });
+        }
+
+    }
+
+    
+    function request_plugin(plugin_name, function_name, args, callback, timeout) {
+        if (!timeout) timeout = 3600;
+        $.ajax({
+            type:'POST',
+            url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
+            data: args,
+            timeout:timeout,
+            success: function(rdata) {
+                if (!callback) {
+                    layer.msg(rdata.msg, { icon: rdata.status ? 1 : 2 });
+                    return;
+                }
+                return callback(rdata);
+            },
+            error: function(ex) {
+                if (!callback) {
+                    layer.msg('请求过程发现错误!', { icon: 2 });
+                    return;
+                }
+                return callback(ex);
+            }
+        });
+    }
+
+    //第一次打开窗口时调用
+    //pysqliteadmin.get_index();
+
+</script>

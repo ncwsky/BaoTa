@@ -1,0 +1,9 @@
+{
+  "title": "内容搜索及批量修改",
+  "name": "mfsearch",
+  "ps": "内容搜索及批量修改",
+  "versions": "1.0",
+  "checks": "/www/server/panel/plugin/mfsearch",
+  "author": "牧飞",
+  "home": "https://www.bt.cn"
+}

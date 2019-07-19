@@ -1,0 +1,18 @@
+{
+	"title":"SSH密钥管理器",
+	"tip":"lib",
+	"name":"sshkey",
+	"type":"第三方应用",
+	"ps":"解决手动设置秘钥的复杂性",
+	"versions":"1.1",
+	"shell":"install.sh",
+	"checks":"/www/server/panel/plugin/sshkey/sshkey_main.py",
+	"author":"带头大哥",
+	"home":"http://www.bt.cn/bbs",
+	"date":"2018-12-22",
+	"default":false,
+	"display":0,
+	"api":true
+}
+
+

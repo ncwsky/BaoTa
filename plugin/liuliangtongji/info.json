@@ -1,0 +1,9 @@
+{
+  "title": "日志分析与流量统计",
+  "name": "liuliangtongji",
+  "ps": "软程科技开发,用于分析日志,查看网站流量分布情况",
+  "versions": "2.1.8",
+  "checks": "/www/server/panel/plugin/liuliangtongji",
+  "author": "软程科技",
+  "home": "https://www.rcwap.com"
+}

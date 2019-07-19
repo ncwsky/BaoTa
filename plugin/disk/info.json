@@ -1,0 +1,9 @@
+{
+  "title": "磁盘挂载工具",
+  "name": "disk",
+  "ps": "一键挂载磁盘，迁移数据",
+  "versions": "1.8",
+  "checks": "/www/server/panel/plugin/disk",
+  "author": "拍拍熊xf",
+  "home": "1196323914@qq.com"
+}

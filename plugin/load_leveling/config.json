@@ -1,0 +1,1 @@
+[{"expires": 12, "secure": false, "session_type": "sticky", "cookie_name": "bt_route", "site_id": 2, "site": "test.com", "pool": "http", "ps": "", "name": "abc", "time": 1562898997, "nodes": [{"weight": 1, "fail_timeout": 180, "addtime": 1562899011, "server": "172.19.163.142", "state": 1, "max_fails": 2, "path": "/index.html", "port": 8081}], "httponly": true}]

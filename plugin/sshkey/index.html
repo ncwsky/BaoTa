@@ -1,0 +1,246 @@
+<style>
+    #ssh_key{
+        padding: 15px;
+    }
+    .ssh_item_50 span,
+    .ssh_item_100 span {
+        float: left;
+        display: inline-block;
+        width: 90px;
+        height: 32px;
+        line-height: 32px;
+        padding-left: 15px;
+    }
+
+    #ssh_key .ssh_line {
+        display: inline-block;
+        height: 32px;
+        line-height: 32px;
+        padding-left: 5px;
+    }
+    #ssh_key .ssh_item_100 .ssh_line{
+        padding-left: 15px;
+    }
+
+    #ssh_key .ssh_item_50 {
+        margin-bottom: 5px;
+        width: 50%;
+        float: left;
+    }
+    #ssh_key .btn-sshkey-group{
+        margin-top: 10px;
+    }
+    #ssh_key .btswitch-ios+.btswitch-btn{
+        margin-bottom: 0px;
+        margin-top: 6px;
+    }
+</style>
+<div id="ssh_key" class="bt-form p15">
+    <div class="ssh_item_50">
+        <span>SSH密码登录</span>
+        <div class="ssh_line">
+            <input class="btswitch btswitch-ios" id="SSH_PAW" type="checkbox">
+            <label class="btswitch-btn" for="SSH_PAW" title="SSH密码登录"></label>
+        </div>
+    </div>
+    <div class="ssh_item_50">
+        <span>SSH密钥登录</span>
+        <div class="ssh_line">
+            <input class="btswitch btswitch-ios" id="SSH_KEY" type="checkbox">
+            <label class="btswitch-btn" for="SSH_KEY" title="SSH密钥登录"></label>
+        </div>
+    </div>
+    <div class="ssh_item_100">
+        <span>SSH密钥</span>
+        <div class="ssh_line">
+            <textarea id="key" class="bt-input-text mr20" disabled="disabled" style="margin: 0px; width: 317px; height: 178px;"></textarea>
+        </div>
+    </div>
+    <div class="ssh_item_100 btn-sshkey-group" style="display:none">
+        <div class="ssh_line">
+            <button type="submit" class="btn btn-success btn-sm btn-copy-sshkey" data-clipboard-text="" >复制</button>
+            <button type="submit" class="btn btn-success btn-sm btn-download-sshkey">下载</button>
+        </div>
+    </div>
+</div>
+
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+<script>
+        var ssh_key = {
+        // 启动
+        load:function(){
+            var _this = this;
+            $('#ssh_key').parent().css({'overflow':'inherit'});
+            $('.layui-layer-page').width(380)
+            this.get_ssh_config();
+            var clipboard = new ClipboardJS('.btn-copy-sshkey');
+            clipboard.on('success', function(e) {
+                layer.msg('复制成功!',{icon:1});
+                e.clearSelection();
+            });
+            clipboard.on('error', function(e) {
+                console.error('Action:', e.action);
+                console.error('Trigger:', e.trigger);
+            });
+            $('#SSH_PAW').change(function(){
+                var start = $(this).attr('data-start');
+                if(start == 'true'){
+                    _this.stop_ssh_paw();
+                }else{
+                    _this.start_ssh_paw();
+                }
+            })
+            $('#SSH_KEY').change(function(){
+                var start = $(this).attr('data-start');
+                if(start == 'true'){
+                    _this.stop_ssh_key();
+                }else{
+                    _this.set_template_sshkey();
+                }
+            });
+            $('.btn-download-sshkey').click(function(){
+                _this.download_ssh(function(res){
+                    window.open(res.msg);
+                });
+            });
+        },
+        // 获取SSH状态
+        get_ssh_config:function(callback){
+            var _this = this;
+            var loadT = layer.load();
+            request_plugin('sshkey','GetConfig','',function(res){
+                layer.close(loadT);
+                var paw = res.password == 'yes'?true:false;
+                var key = (res.pubkey == 'yes' && res.rsa_auth == 'yes') ? true : false;
+                $('#SSH_PAW').prop('checked',paw).attr('data-start',paw);
+                $('#SSH_KEY').prop('checked',key).attr('data-start',key);
+                if(key){
+                    _this.get_ssh_key(function(res){
+                        if(res.status){
+                            $('#key').val(res.msg).removeAttr('disabled');
+                            $('.btn-sshkey-group').show().find('.btn-copy-sshkey').attr('data-clipboard-text',res.msg);
+                        }else{
+                            layer.msg(res.msg,{icon:2});
+                        }
+                    });
+                }else{
+                    $('.btn-sshkey-group').hide();
+                    $('#key').val('').attr('disabled','disabled')
+                }
+            });
+        },
+        set_template_sshkey:function(){
+            var _this = this;
+            var loadT = layer.open({
+                title:'开启SSH密钥登录',
+                area:'250px',
+                type:1,
+                closeBtn: 2,
+                content:'<div class="bt-form bt-form pd20 pb70">'+
+                            '<div class="line "><span class="tname">SSH密码登录</span><div class="info-r "><select class="bt-input-text mr5 ssh_select_login" style="width:70px"><option value="yes">开启</option><option value="no">关闭</option></select></div></div>'+
+                            '<div class="line "><span class="tname">密钥加密方式</span><div class="info-r "><select class="bt-input-text mr5 ssh_select_encryption" style="width:70px"><option value="rsa">rsa</option><option value="dsa">dsa</option></select></div></div>'+
+                            '<div class="bt-form-submit-btn"><button type="button" class="btn btn-sm btn-danger close_ssh_key">关闭</button><button type="button" class="btn btn-sm btn-success submit_ssh_key">提交</button></div>'+
+                        '</div>'
+            });
+            $('.close_ssh_key').click(function(){
+                layer.close(loadT);
+            });
+            $('.submit_ssh_key').click(function(){
+                var ssh_select_login = $('.ssh_select_login').val();
+                var ssh_select_encryption = $('.ssh_select_encryption').val();
+                _this.set_ssh_key({ssh:ssh_select_login,type:ssh_select_encryption},function(res){
+                    layer.close(loadT);
+                    _this.get_ssh_config();
+                })
+            });
+        },
+        // 设置SSH-KEY登录
+        set_ssh_key:function(obj,callback){
+            console.log(obj);
+            var loadT = layer.msg('正在设置SSH_KEY，请稍后...',{icon:16,shade: [0.3, "#000"]});
+            request_plugin('sshkey','SetSshKey',{ssh:obj.ssh,type:obj.type},function(res){
+                layer.msg(res.msg,{icon:res.status?1:2});
+                if(callback) callback(res);
+            });
+        },
+        // 获取SSH密钥
+        get_ssh_key:function(callback){
+            var loadT = layer.msg('正在获取SSH_KEY，请稍后...',{icon:16,shade: [0.3, "#000"]});
+            request_plugin('sshkey','GetKey','',function(res){
+                layer.close(loadT);
+                if(callback) callback(res);
+            });
+        },
+        // 下载SSH密钥
+        download_ssh:function(callback){
+            var loadT = layer.msg('正在下载SSH_KEY，请稍后...',{icon:16,shade: [0.3, "#000"]});
+            request_plugin('sshkey','Download','',function(res){
+                layer.close(loadT);
+                if(callback) callback(res);
+            });
+        },
+        // 关闭密码登录
+        stop_ssh_paw:function(callback){
+            var _this = this;
+            var loadT = layer.msg('正在关闭SSH密码登录，请稍后...',{icon:16,shade: [0.3, "#000"]});
+            request_plugin('sshkey','StopPassword','',function(res){
+                layer.msg(res.msg,{icon:res.status?1:2});
+                _this.get_ssh_config();
+                if(callback) callback(res);
+            });
+        },
+        // 开启密码登录
+        start_ssh_paw:function(callback){
+            var _this = this;
+            var loadT = layer.msg('正在开启SSH密码登录，请稍后...',{icon:16,shade: [0.3, "#000"]});
+            request_plugin('sshkey','SetPassword','',function(res){
+                layer.msg(res.msg,{icon:res.status?1:2});
+                _this.get_ssh_config();
+                if(callback) callback(res);
+            });
+        },
+        // 关闭KEY登录
+        stop_ssh_key:function(callback){
+            var _this = this;
+            var loadT = layer.msg('正在关闭SSH_KEY登录，请稍后...',{icon:16,shade: [0.3, "#000"]});
+            request_plugin('sshkey','StopKey','',function(res){
+                layer.msg(res.msg,{icon:res.status?1:2});
+                _this.get_ssh_config();
+                if(callback) callback(res);
+            });
+        },
+    }
+
+                                                                     /**           
+     * 发送请求到插件
+     * 注意：除非你知道如何自己构造正确访问插件的ajax，否则建议您使用此方法与后端进行通信
+     * @param plugin_name    插件名称 如：demo
+     * @param function_name  要访问的方法名，如：get_logs
+     * @param object         传到插件方法中的参数 请传入对象，示例：{p:1,rows:10,callback:"demo.get_logs"}
+     * @param callback       请传入处理函数，响应内容将传入到第一个参数中
+     */
+    function request_plugin(plugin_name, function_name, args, callback, timeout) {
+        if (!timeout) timeout = 3600;
+        $.ajax({
+            type:'POST',
+            url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
+            data: args,
+            timeout:timeout,
+            success: function(rdata) {
+                if (!callback) {
+                    layer.msg(rdata.msg, { icon: rdata.status ? 1 : 2 });
+                    return;
+                }
+                return callback(rdata);
+            },
+            error: function(ex) {
+                if (!callback) {
+                    layer.msg('请求过程发现错误!', { icon: 2 });
+                    return;
+                }
+                return callback(ex);
+            }
+        });
+    }
+    ssh_key.load();
+</script>

@@ -1,0 +1,16 @@
+{
+	"title":"文件共享管理器",
+	"tip":"lib",
+	"name":"nfsserver",
+	"type":"第三方应用",
+	"ps":"实现linux windows 文件共享管理器",
+	"versions":"1.2",
+	"shell":"install.sh",
+	"checks":"/www/server/panel/plugin/nfsserver/nfsserver_main.py",
+	"author":"带头大哥",
+	"home":"http://www.bt.cn/bbs",
+	"date":"2019-1-8",
+	"default":false,
+	"display":0,
+	"api":true
+}
