@@ -19,6 +19,7 @@ from flask_session import Session
 from werkzeug.contrib.cache import SimpleCache
 from werkzeug.wrappers import Response
 from flask_socketio import SocketIO,emit,send
+dns_client = None
 
 #设置BasicAuth
 basic_auth_conf = 'config/basic_auth.json' 
@@ -79,7 +80,7 @@ cache.set('p_token','bmac_' + public.Md5(public.get_mac_address()))
 admin_path_file = 'data/admin_path.pl'
 admin_path = '/'
 if os.path.exists(admin_path_file): admin_path = public.readFile(admin_path_file).strip()
-admin_path_checks = ['/','/close','/task','/login','/config','/site','/sites','ftp','/public','/database','/data','/download_file','/control','/crontab','/firewall','/files','config','/soft','/ajax','/system','/panel_data','/code','/ssl','/plugin','/wxapp','/hook','/safe','/yield','/downloadApi','/pluginApi','/auth','/download','/cloud','/webssh','/connect_event','/panel']
+admin_path_checks = ['/','/san','/monitor','/abnormal','/close','/task','/login','/config','/site','/sites','ftp','/public','/database','/data','/download_file','/control','/crontab','/firewall','/files','config','/soft','/ajax','/system','/panel_data','/code','/ssl','/plugin','/wxapp','/hook','/safe','/yield','/downloadApi','/pluginApi','/auth','/download','/cloud','/webssh','/connect_event','/panel']
 if admin_path in admin_path_checks: admin_path = '/bt'
 
 @app.route('/service_status',methods = method_get)
@@ -114,6 +115,7 @@ def home():
     data['ftpCount'] = public.M('ftps').count()
     data['databaseCount'] = public.M('databases').count()
     data['lan'] = public.GetLan('index')
+    data['724'] = public.format_date("%m%d") == '0724'
     return render_template( 'index.html',data = data)
 
 @app.route('/close',methods=method_get)
@@ -320,7 +322,7 @@ def panel_monitor(pdata=None):
     if comReturn: return comReturn
     import monitor
     dataObject = monitor.Monitor()
-    defs = ('get_access_ip', 'get_exception', 'get_exception_logs', 'get_attack_nums', 'php_count', 'return_php', 'mysql_client_count')
+    defs = ('get_spider', 'get_exception', 'get_request_count_qps', 'load_and_up_flow', 'get_request_count_by_hour')
     return publicObject(dataObject, defs, None, pdata)
 
 
@@ -330,17 +332,17 @@ def san_baseline(pdata=None):
     if comReturn: return comReturn
     import san_baseline
     dataObject = san_baseline.san_baseline()
-    defs = ('start', 'get_api_log', 'get_resut', 'get_ssh_errorlogin')
+    defs = ('start', 'get_api_log', 'get_resut', 'get_ssh_errorlogin','repair','repair_all')
     return publicObject(dataObject, defs, None, pdata)
-  
-  
+
+
 @app.route('/abnormal', methods=method_all)
 def abnormal(pdata=None):
     comReturn = comm.local()
     if comReturn: return comReturn
     import abnormal
     dataObject = abnormal.abnormal()
-    defs = ( 'mysql_server', 'mysql_cpu', 'mysql_count', 'php_server', 'php_conn_max', 'php_cpu', 'CPU', 'Memory', 'disk', 'not_root_user','start')
+    defs = ('mysql_server', 'mysql_cpu', 'mysql_count', 'php_server', 'php_conn_max', 'php_cpu', 'CPU', 'Memory', 'disk', 'not_root_user', 'start')
     return publicObject(dataObject, defs, None, pdata)
 
 @app.route('/files',methods=method_all)
@@ -483,7 +485,7 @@ def ssl(pdata = None):
     if comReturn: return comReturn
     import panelSSL
     toObject = panelSSL.panelSSL()
-    defs = ('RemoveCert','SetCertToSite','GetCertList','SaveCert','GetCert','GetCertName','DelToken','GetToken','GetUserInfo','GetOrderList','GetDVSSL','Completed','SyncOrder','GetSSLInfo','downloadCRT','GetSSLProduct','Renew_SSL','Get_Renew_SSL')
+    defs = ('RemoveCert','renew_lets_ssl','SetCertToSite','GetCertList','SaveCert','GetCert','GetCertName','DelToken','GetToken','GetUserInfo','GetOrderList','GetDVSSL','Completed','SyncOrder','GetSSLInfo','downloadCRT','GetSSLProduct','Renew_SSL','Get_Renew_SSL')
     result = publicObject(toObject,defs,None,pdata);
     return result;
 
@@ -512,7 +514,7 @@ def plugin(pdata = None):
 def panel_public():
     get = get_input();
     get.client_ip = public.GetClientIp();
-    
+    if not public.path_safe_check("%s/%s" % (get.name,get.fun)): return abort(404)
     if get.fun in ['scan_login','login_qrcode','set_login','is_scan_ok','blind']:
         #检查是否验证过安全入口
         if get.fun in ['login_qrcode','is_scan_ok']:
@@ -528,7 +530,6 @@ def panel_public():
     import panelPlugin
     plu = panelPlugin.panelPlugin()
     get.s = '_check';
-        
     checks = plu.a(get)
     if type(checks) != bool or not checks: return public.getJson(checks),json_header
     get.s = get.fun
@@ -545,30 +546,6 @@ def send_favicon():
     if not os.path.exists(s_file): return abort(404)
     return send_file(s_file,conditional=True,add_etags=True)
 
-
-@socketio.on('coll_socket')
-def coll_socket(msg):
-    coll_path = '/www/server/panel/plugin/coll'
-    if not os.path.exists(coll_path): 
-        emit('coll_response',{'data':'未安装宝塔群控主控端!'})
-        return;
-    if type(msg) == str or not 'f' in msg: 
-        emit('coll_response',{'data':'参数错误!'})
-        return;
-    sys.path.insert(0,coll_path)
-    from inc import coll_terminal
-    try:
-        if sys.version_info[0] == 2:
-            reload(coll_terminal)
-        else:
-            from imp import reload
-            reload(coll_terminal)
-    except:pass
-    t = coll_terminal.coll_terminal()
-    if not hasattr(t,msg['f']): 
-        emit('coll_response',{'data':'指定方法不存在!'})
-        return;
-    emit('coll_response',getattr(t,msg['f'])(msg))
 
 @app.route('/coll',methods=method_all)
 @app.route('/coll/',methods=method_all)
@@ -587,10 +564,12 @@ def panel_other(name=None,fun = None,stype=None):
     #前置准备
 
     if not name: name = 'coll'
+    if not public.path_safe_check("%s/%s/%s" % (name,fun,stype)): return abort(404)
 
     #是否响应面板默认静态文件
     if name == 'static':
         s_file = '/www/server/panel/BTPanel/static/' + fun + '/' + stype
+        if s_file.find('..') != -1 or s_file.find('./') != -1: return abort(404)
         if not os.path.exists(s_file): return abort(404)
         return send_file(s_file,conditional=True,add_etags=True)
 
@@ -604,6 +583,7 @@ def panel_other(name=None,fun = None,stype=None):
     if fun == 'static':
         if stype.find('./') != -1 or not os.path.exists(p_path + '/static'): return public.returnJson(False,'错误的请求!'),json_header
         s_file = p_path + '/static/' + stype
+        if s_file.find('..') != -1: return abort(404)
         if not os.path.exists(s_file): return public.returnJson(False,'指定文件不存在['+stype+']'),json_header
         return send_file(s_file,conditional=True,add_etags=True)
 
@@ -776,44 +756,6 @@ def check_token(data):
     if result['token'] != token: return False;
     return result;
 
-@app.route('/yield',methods=method_all)
-def panel_yield():
-    get = get_input()
-    import panelPlugin
-    plu = panelPlugin.panelPlugin()
-    get.s = '_check';
-    get.client_ip = public.GetClientIp()
-    checks = plu.a(get)
-    if type(checks) != bool or not checks: return
-    get.s = get.fun
-    filename = plu.a(get);
-    mimetype = 'application/octet-stream'
-    return send_file(filename,mimetype=mimetype, as_attachment=True,attachment_filename=os.path.basename(filename))
-
-@app.route('/downloadApi',methods=method_all)
-def panel_downloadApi():
-    get = get_input()
-    if not public.checkToken(get): get.filename = str(time.time());
-    filename = 'plugin/psync/backup/' + get.filename.encode('utf-8');
-    mimetype = 'application/octet-stream'
-    return send_file(filename,mimetype=mimetype, as_attachment=True,attachment_filename=os.path.basename(filename))
-
-
-@app.route('/pluginApi',methods=method_all)
-def panel_pluginApi():
-    get = get_input()
-    if not public.checkToken(get): return public.returnJson(False,'INIT_TOKEN_ERR');
-    infoFile = 'plugin/' + get.name + '/info.json';
-    if not os.path.exists(infoFile): return False;
-    import json
-    info = json.loads(public.readFile(infoFile));
-    if not info['api']:  return public.returnJson(False,'INIT_PLU_ACC_ERR');
-
-    import panelPlugin
-    pluginObject = panelPlugin.panelPlugin()
-    
-    defs = ('install','unInstall','getPluginList','getPluginInfo','getPluginStatus','setPluginStatus','a','getCloudPlugin','getConfigHtml','savePluginSort')
-    return publicObject(pluginObject,defs);
 
 @app.route('/auth',methods=method_all)
 def auth(pdata = None):
@@ -872,6 +814,11 @@ try:
     ssh = paramiko.SSHClient()
 except:
     public.ExecShell('pip install paramiko==2.0.2 &')
+
+@socketio.on('connect')
+def socket_connect(msg=None):
+    if not check_login(): 
+        raise emit('server_response',{'data':public.getMsg('INIT_WEBSSH_LOGOUT')})
 
 @socketio.on('webssh')
 def webssh(msg):
@@ -982,7 +929,7 @@ def check_csrf():
 
 def publicObject(toObject,defs,action=None,get = None):
     if 'request_token' in session and 'login' in session:
-        if not check_csrf(): return public.ReturnJson(False,'Csrf-Token error.'),json_header
+        if not check_csrf(): return public.ReturnJson(False,'CSRF校验失败，请重新登录面板'),json_header
 
     if not get: get = get_input()
     if action: get.action = action

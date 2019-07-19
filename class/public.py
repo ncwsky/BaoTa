@@ -708,6 +708,12 @@ def inArray(arrays,searchStr):
     
     return False
 
+#格式化指定时间戳
+def format_date(format="%Y-%m-%d %H:%M:%S",times = None):
+    if not times: times = int(time.time())
+    time_local = time.localtime(times)
+    return time.strftime(format, time_local) 
+
 
 #检查Web服务器配置文件是否有错误
 def checkWebConfig():
@@ -772,12 +778,17 @@ def getStrBetween(startStr,endStr,srcStr):
 
 #取CPU类型
 def getCpuType():
-    cpuinfo = open('/proc/cpuinfo','r').read();
+    cpuinfo = open('/proc/cpuinfo','r').read()
     rep = "model\s+name\s+:\s+(.+)"
-    tmp = re.search(rep,cpuinfo);
-    cpuType = None
+    tmp = re.search(rep,cpuinfo,re.I);
+    cpuType = ''
     if tmp:
-        cpuType = tmp.groups()[0];
+        cpuType = tmp.groups()[0]
+    else:
+        cpuinfo = ExecShell('LANG="en_US.UTF-8" && lscpu')[0]
+        rep = "Model\s+name:\s+(.+)"
+        tmp = re.search(rep,cpuinfo,re.I)
+        if tmp: cpuType = tmp.groups()[0]
     return cpuType;
 
 
@@ -1253,3 +1264,65 @@ def set_own(filename,user,group=None):
         group = user_info.pw_gid
     os.chown(filename,user,group)
     return True
+
+#校验路径安全
+def path_safe_check(path):
+    checks = ['..','./','\\','%','$','^','&','*','~','@','#']
+    for c in checks:
+        if path.find(c) != -1: return False
+    rep = "^[\w\s\.\/-]+$"
+    if not re.match(rep,path): return False
+    return True
+
+#取数据库字符集
+def get_database_character(db_name):
+    try:
+        import panelMysql
+        tmp = panelMysql.panelMysql().query("show create database `%s`" % db_name.strip())
+        return str(re.findall("SET\s+(.+)\s",tmp[0][1])[0])
+    except:
+        return 'utf8'
+
+def en_punycode(domain):
+        tmp = domain.split('.');
+        newdomain = '';
+        for dkey in tmp:
+            #匹配非ascii字符
+            match = re.search(u"[\x80-\xff]+",dkey);
+            if not match: match = re.search(u"[\u4e00-\u9fa5]+",dkey);
+            if not match:
+                newdomain += dkey + '.';
+            else:
+                newdomain += 'xn--' + dkey.encode('punycode').decode('utf-8') + '.'
+        return newdomain[0:-1];
+
+#punycode 转中文
+def de_punycode(domain):
+    tmp = domain.split('.');
+    newdomain = '';
+    for dkey in tmp:
+        if dkey.find('xn--') >=0:
+            newdomain += dkey.replace('xn--','').encode('utf-8').decode('punycode') + '.'
+        else:
+            newdomain += dkey + '.'
+    return newdomain[0:-1];
+
+#取计划任务文件路径
+def get_cron_path():
+    u_file = '/var/spool/cron/crontabs/root'
+    if not os.path.exists(u_file):
+        file='/var/spool/cron/root'
+    else:
+        file=u_file
+    return file
+
+#取通用对象
+class dict_obj:
+    def __contains__(self, key):
+        return getattr(self,key,None)
+    def __setitem__(self, key, value): setattr(self,key,value)
+    def __getitem__(self, key): return getattr(self,key,None)
+    def __delitem__(self,key): delattr(self,key)
+    def __delattr__(self, key): delattr(self,key)
+    def get_items(self): return self
+
