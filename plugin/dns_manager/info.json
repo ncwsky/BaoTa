@@ -1,0 +1,11 @@
+{
+	"title": "Dns管理器",
+	"name": "dns_manager",
+	"ps": "暂时只支持centos7及以上",
+	"versions": "1.3",
+	"checks": "/www/server/panel/plugin/dns_manager",
+	"author": "官方",
+	"home": "http://www.bt.cn",
+	"date": "",
+    "display": 1
+}

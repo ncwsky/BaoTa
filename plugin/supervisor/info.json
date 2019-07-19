@@ -1,0 +1,9 @@
+{
+  "title": "Supervisor管理器",
+  "name": "supervisor",
+  "ps": "一个Python开发的通用的进程管理程序",
+  "versions": "1.0",
+  "checks": "/www/server/panel/plugin/supervisor",
+  "author": "宝塔",
+  "home": "https://www.bt.cn"
+}

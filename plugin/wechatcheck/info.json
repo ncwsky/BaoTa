@@ -1,0 +1,9 @@
+{
+  "title": "微信域名检测",
+  "name": "wechatcheck",
+  "ps": "自动检测服务器上所有域名在微信环境下是否存在被封杀。",
+  "versions": "1.0",
+  "checks": "/www/server/panel/plugin/wechatcheck",
+  "author": "猴子数据",
+  "home": "http://www.monkeyapi.com"
+}

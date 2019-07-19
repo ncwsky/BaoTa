@@ -1,0 +1,292 @@
+<style>
+    /*样式写这里*/
+    .txt_phone {
+            width: 500px;
+            outline: none;
+            /*display: block;*/
+            margin: 10px 30px 15px auto;
+            height: 40px;
+            line-height: 40px;
+            border: 1px solid #0096e6;
+            border-radius: 60px;
+            text-align: center;
+            font-size: 19px;
+            background: transparent;
+        }
+
+        .btn_sumbit {
+            display: block;
+            width: 80px;
+            height: 30px;
+            line-height: 26px;
+            margin-left: 329px;
+            background: transparent;
+            border: 1px solid #0096e6;
+            font-weight: bold;
+            border-radius: 40px;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            outline: 0;
+        }
+
+        th {
+            height: 50px;
+            background-color: #23425f;
+            text-align: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: normal;
+            border-right: 1px solid #323232;
+        }
+
+        .titH2 {
+            text-align: center;
+            font-size: 30px;
+            color: #3c3c3c;
+            padding-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .inner {
+            /*width: 1080px;*/
+            margin: 0 auto;
+        }
+
+        .tableNormal tr td:first-child {
+            width: 165px;
+            text-align: center;
+            font-size: 14px;
+            /*width: 180px;*/
+            padding-left: 15px;
+            color: #000;
+        }
+
+        .tableNormal td {
+            border-right: 1px solid #dcdcdc;
+            width: 150px;
+            height: 40px;
+            color: #404040;
+            text-align: center;
+            min-height: 40px;
+        }
+        .tableNormal span{
+            display: inline-block;
+            text-align: center;
+            height: 46px;
+            line-height: 46px;
+            width: 200px;
+            word-wrap: break-word;
+        }
+    table{
+        width: 670px;
+    }
+</style>
+<div class="bt-form">
+    <div class="bt-w-main">
+         <div class="bt-w-menu">
+            <p class="bgw" onclick="qiankeji.set_configshow(0)">主页</p>
+            <p onclick="qiankeji.set_configshow(1)">配置</p>
+        </div>
+        <div class="pd15">
+            <div class="plugin_body">
+                <!--查询界面-->
+                    <div class="layadmin-user-login" id="user-login-search" style="padding-top:0px;display: none;">
+                        <div class="layadmin-user-login-main">
+                            <div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+                                    <div class="layui-form-item">
+                                        <input type="text" id="phone" placeholder="手机号" style="margin-left: 20px;" class="layui-input txt_phone">
+<!--                                        <input type="text" id="token" placeholder="Token" class="layui-input txt_phone">-->
+<!--                                       <div style="display: inline-block;height: 40px;text-align: center;">-->
+<!--                                           <a style="font-size: 14px;cursor:pointer;color:red;position: absolute;top: 27px;" href="https://www.qiansec.com" target="_blank">没有Token?<br />点击这里注册获取Token</a>-->
+<!--                                       </div>-->
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <button type="button" onclick="qiankeji.get_qiankeji()" class="btn_sumbit">查询</button>
+                                    </div>
+                            </div>
+                         </div>
+                        <div class="tableNormal" id="table1" style="background-color: #ffffff;" >
+                                <div class="inner">
+                                    <h2 class="titH2">相关数据信息</h2>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <th>数据</th>
+                                                <th style="clear: both"><span style="display: inline-block;">手机号信息</span></th>
+                                            </tr>
+                                            <tr>
+                                                <td>当前手机号</td>
+                                                <td style="clear: both">
+                                                    <span class="span_phone">
+
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>是否媷羊毛手机号</td>
+                                                <td style="clear: both">
+                                                     <span class="span_Iseval"></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>检测到的薅羊毛手机号数</td>
+                                                <td style="clear: both">
+                                                   <span class="span_phonenum"></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>剩余查询次数</td>
+                                                <td style="clear: both"><span class="span_balance"></span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>查询结果</td>
+                                                <td style="clear: both">
+                                                    <span style="color:red;" class="span_resultmsg"></span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                        </div>
+                    </div>
+                 <!--配置界面-->
+                    <div class="layadmin-user-login" id="user-login-config" style="padding-top:0px;display: none;">
+                        <div class="layadmin-user-login-main">
+                            <div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+                                <div class="layui-form-item">
+                                    <input type="text" id="configtoken" placeholder="账户Token" class="layui-input txt_phone" style="margin-left: 23px;">
+                                    <input type="text" id="configip" placeholder="白名单IP" style="margin-left: 20px;" class="layui-input txt_phone">
+                                   <div style="display: inline-block;height: 40px;text-align: center;">
+                                       <a style="font-size: 14px;cursor:pointer;color:red;position: absolute;top: 28px;right: 85px;" href="https://www.qiansec.com" target="_blank">没有Token?<br />点击这里注册获取Token</a>
+                                       <span style="font-size: 14px;color:red;top: 28px;">IP白名单<br>配置白名单才能发起远程请求</span>
+                                   </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <button type="button" onclick="qiankeji.set_config()" class="btn_sumbit">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+<script type="text/javascript">
+
+     //定义窗口尺寸
+    $('.layui-layer-page').css({ 'width': '900px' });
+
+    //左测菜单切换效果
+    $(".bt-w-menu p").click(function () {
+        $(this).addClass('bgw').siblings().removeClass('bgw')
+    });
+
+    /**
+     * 插件交互对象
+     * 您的所有JS代码可以写在里面
+     * 若不习惯JS的面向对象编程，可删除此对象，使用传统函数化的方式编写
+     * */
+    var qiankeji = {
+        //构造概览内容
+        get_inIt: function () {
+            $("#user-login-search").show();
+            qiankeji.get_config();
+        },
+        set_configshow(index){
+            $(".layadmin-user-login").eq(index).show().siblings().hide();
+        },
+        set_config : function (p) {
+                    var $configip = $("#configip").val().trim();
+                    if(!$configip || $configip == null || $configip == ""){
+                       layer.msg('请输入需要配置白名单的IP!', { icon: 2 });
+                       return false;
+                    }
+                  var $configtoken = $("#configtoken").val().trim();
+                  if(!$configtoken || $configtoken == null || $configtoken == ""){
+                      layer.msg('请输入账户绑定的Token!', { icon: 2 });
+                      return false;
+                  }
+
+            request_plugin('qiankeji', 'set_config', { ip: $configip,token:$configtoken, callback: 'qiankeji.set_config' }, function (rdata) {
+                if(rdata.status){
+                    layer.msg('保存成功', { icon: 1 });
+                }else{
+                    layer.msg('保存失败,如有疑问可联系作者,或在插件目录下手动修改json.txt文件', { icon: 2 });
+                }
+            });
+        },
+        get_config : function (p) {
+            request_plugin('qiankeji', 'get_config', { callback: 'qiankeji.get_config' }, function (rdata) {
+                if(rdata.status){
+                    $("#configtoken").val(rdata.msg.token);
+                    $("#configip").val(rdata.msg.ip);
+                }else{
+                    layer.msg('当前暂未配置相关配置,请配置IP白名单和账户Token', { icon: 2 });
+                }
+            });
+        },
+        /**
+         * 获取面板日志
+         * @param p 被获取的分页
+         */
+        get_qiankeji : function (p) {
+                    var $phone = $("#phone").val().trim();
+                    if(!$phone || $phone == null || $phone == ""){
+                       layer.msg('请输入需要查询的手机号!', { icon: 2 });
+                       return false;
+                    }
+            request_plugin('qiankeji', 'get_qiankeji', { phone: $phone,callback: 'qiankeji.get_qiankeji' }, function (rdata) {
+                if(rdata.msg){
+                    layer.msg(rdata.msg, { icon: 2 });
+                }else{
+                       var data =JSON.parse(rdata.replace(/\ufeff/g,''));//去掉Bom头
+                        $("#table1 .span_phone").html($("#phone").val().trim());
+                        $("#table1 .span_Iseval").html(data.iseval == 1 ? "是":"否");
+                        $("#table1 .span_phonenum").html(data.iseval == 1 ? "1":"0");
+                        $("#table1 .span_balance").html(data.balance);
+                        $("#table1 .span_resultmsg").html(data.Error == "0" ? "查询成功": data.Error);
+                }
+            });
+        }
+
+    }
+
+    /**
+     * 发送请求到插件
+     * 注意：除非你知道如何自己构造正确访问插件的ajax，否则建议您使用此方法与后端进行通信
+     * @param plugin_name    插件名称 如：demo
+     * @param function_name  要访问的方法名，如：get_logs
+     * @param args           传到插件方法中的参数 请传入数组，示例：{p:1,rows:10,callback:"demo.get_logs"}
+     * @param callback       请传入处理函数，响应内容将传入到第一个参数中
+     */
+    function request_plugin(plugin_name, function_name, args, callback, timeout) {
+        if (!timeout) timeout = 3600;
+        $.ajax({
+            type:'POST',
+            url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
+            data: args,
+            timeout:timeout,
+            success: function(rdata) {
+                if (!callback) {
+                    layer.msg(rdata.msg, { icon: rdata.status ? 1 : 2 });
+                    return;
+                }
+                return callback(rdata);
+            },
+            error: function(ex) {
+                if (!callback) {
+                    layer.msg('请求过程发现错误!', { icon: 2 });
+                    return;
+                }
+                return callback(ex);
+            }
+        });
+    }
+
+    //第一次打开窗口时调用
+    qiankeji.get_inIt();
+
+</script>

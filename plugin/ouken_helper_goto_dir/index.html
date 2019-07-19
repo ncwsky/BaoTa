@@ -1,0 +1,204 @@
+<style>
+
+</style>
+<link rel="stylesheet" href="/ouken_helper_goto_dir/static/css/timeline.css">
+<div class="bt-form">
+    <div class="bt-w-main">
+        <!--菜单部分-->
+        <div class="bt-w-menu">
+            <p class="bgw" onclick="ouken_helper_goto_dir.get_index()">基本功能</p>
+            <p onclick="ouken_helper_goto_dir.get_version()">版本功能</p>
+            <p onclick="ouken_helper_goto_dir.get_info()">关于软件</p>
+        </div>
+        <!--内容部分-->
+        <div class="bt-w-con pd15">
+            <div class="plugin_body">
+                <div class="rightdiv" id="id_index">
+                    <div class="soft-man-con bt-form">
+                        <p id="id_state_on" class="status hidden">当前状态：
+                            <span>开启</span><span style="color: #20a53a; margin-left: 3px;"
+                                class="glyphicon glyphicon glyphicon-play"></span>
+                        </p>
+                        <p id="id_state_off" class="status hidden">当前状态：
+                            <span>关闭</span><span style="color: red; margin-left: 3px;"
+                                class="glyphicon glyphicon-pause"></span>
+                        </p>
+                        <div class="sfm-opt">
+                            <button class="btn btn-default btn-sm"
+                                onclick="ouken_helper_goto_dir.enable()">启用助手功能</button>
+                            <button class="btn btn-default btn-sm"
+                                onclick="ouken_helper_goto_dir.disable()">禁用助手功能</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rightdiv hidden center" id="id_version">
+                    <div class="content">
+                        <article>
+                            <section>
+                                <span class="point-time" style="background-color: #7A57D1;"></span>
+                                <time datetime="2019-08">
+                                    <span>2019/8/某日</span>
+                                    <span></span>
+                                </time>
+                                <aside>
+                                    <p class="things">V1.3</p>
+                                    <p class="brief"><span
+                                            style="color: #7A57D1;">待定下，还不确定更新哪里~</span>
+                                    </p>
+                                </aside>
+                            </section>
+                            <section>
+                                <span class="point-time" style="background-color: #5BE7C4;"></span>
+                                <time datetime="2019-07">
+                                    <span>2019/7/17</span>
+                                    <span></span>
+                                </time>
+                                <aside>
+                                    <p class="things">V1.2</p>
+                                    <p class="brief"><span
+                                            style="color: #5BE7C4;">将宝塔文件页面的退格键修改为返回上级目录（windows用习惯了，还是这样舒服呢~）</span>
+                                    </p>
+                                </aside>
+                            </section>
+                            <section>
+                                <span class="point-time" style="background-color: #5BE7C4;"></span>
+                                <time datetime="2019-07">
+                                    <span>2019/7/16</span>
+                                    <span></span>
+                                </time>
+                                <aside>
+                                    <p class="things">V1.1</p>
+                                    <p class="brief"><span
+                                            style="color: #5BE7C4;">写好了初始的功能，在宝塔文件页面增加右击转到目录（搜索之后也可以用哦~）</span>
+                                    </p>
+                                </aside>
+                            </section>
+                            <section>
+                                <span class="point-time" style="background-color: #50C1E9;"></span>
+                                <time datetime="2019-07">
+                                    <span>2019/7/15</span>
+                                    <span></span>
+                                </time>
+                                <aside>
+                                    <p class="things">V1.0</p>
+                                    <p class="brief"><span
+                                            style="color: #50C1E9;">河妖编了好久终于编好了一个似乎还不错的名字</span></p>
+                                </aside>
+                            </section>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="rightdiv hidden" id="id_me">
+                    <h1 style='text-align:center;margin-top:20%;'>河妖只是一个兴趣做开发的人罢了</h1>
+                    <h1 style='text-align:center;margin-top:10%;'>Mail:I__LOVE__YOU@LIVE.COM</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+<script type="text/javascript">
+    //定义窗口尺寸
+    $('.layui-layer-page').css({
+        'width': '900px'
+    });
+
+    //左测菜单切换效果
+    $(".bt-w-menu p").click(function () {
+        $(this).addClass('bgw').siblings().removeClass('bgw')
+    });
+
+    var ouken_helper_goto_dir = {
+        //构造概览内容
+        get_init: function () {
+            request_plugin('ouken_helper_goto_dir', 'check_state', {}, function (rdata) {
+                console.log(rdata);
+                if (rdata.code) {
+                    $("#id_state_on").removeClass("hidden");
+                    $("#id_state_off").addClass("hidden");
+                } else {
+                    $("#id_state_on").addClass("hidden");
+                    $("#id_state_off").removeClass("hidden");
+                }
+            });
+        },
+
+        get_index: function () {
+            $(".rightdiv").addClass("hidden");
+            $("#id_index").removeClass("hidden");
+        },
+
+        get_version: function () {
+            $(".rightdiv").addClass("hidden");
+            $("#id_version").removeClass("hidden");
+        },
+
+        get_info: function () {
+            $(".rightdiv").addClass("hidden");
+            $("#id_me").removeClass("hidden");
+        },
+
+        enable: function () {
+            request_plugin('ouken_helper_goto_dir', 'enable', {}, function (rdata) {
+                console.log(rdata);
+                if (rdata.code) {
+                    $("#id_state_on").removeClass("hidden");
+                    $("#id_state_off").addClass("hidden");
+                }
+            });
+        },
+
+        disable: function () {
+            request_plugin('ouken_helper_goto_dir', 'disable', {}, function (rdata) {
+                console.log(rdata);
+                if (rdata.code) {
+                    $("#id_state_on").addClass("hidden");
+                    $("#id_state_off").removeClass("hidden");
+                }
+            });
+        }
+
+    }
+
+    /**
+     * 发送请求到插件
+     * 注意：除非你知道如何自己构造正确访问插件的ajax，否则建议您使用此方法与后端进行通信
+     * @param plugin_name    插件名称 如：demo
+     * @param function_name  要访问的方法名，如：get_logs
+     * @param args           传到插件方法中的参数 请传入数组，示例：{p:1,rows:10,callback:"demo.get_logs"}
+     * @param callback       请传入处理函数，响应内容将传入到第一个参数中
+     */
+
+    function request_plugin(plugin_name, function_name, args, callback, timeout) {
+        if (!timeout) timeout = 3600;
+        $.ajax({
+            type: 'POST',
+            url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
+            data: args,
+            timeout: timeout,
+            success: function (rdata) {
+                if (!callback) {
+                    layer.msg(rdata.msg, {
+                        icon: rdata.status ? 1 : 2
+                    });
+                    return;
+                }
+                return callback(rdata);
+            },
+            error: function (ex) {
+                if (!callback) {
+                    layer.msg('请求过程发现错误!', {
+                        icon: 2
+                    });
+                    return;
+                }
+                return callback(ex);
+            }
+        });
+    }
+
+    //第一次打开窗口时调用
+    ouken_helper_goto_dir.get_init();
+</script>

@@ -1,0 +1,15 @@
+{
+	"title":"DNS云解析",
+	"tip":"lib",
+	"name":"dns",
+	"type":"扩展",
+	"ps":"由<a class='btlink' href='https://www.dns.com/?bt.cn' target='_blank'>[DNS.COM]</a>提供的200000Q/S域名DNS云解析服务",
+	"versions":"2.0",
+	"shell":"dns.sh",
+	"checks":"/www/server/panel/plugin/dns",
+	"author":"宝塔",
+	"home":"http://www.bt.cn/bbs",
+	"date":"2017-12-25",
+	"default":false,
+	"display":0
+}

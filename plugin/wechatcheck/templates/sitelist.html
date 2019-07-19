@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>域名</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for value in data['data'] %}
+            <tr>
+                <td>{{value['name']}}</td>
+                <td>{{value['name']}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>{{data['page']|safe}}</p>
+</body>
+<script type="text/javascript" src="/demo/static/js/monkeyapi.js"></script>
+</html>

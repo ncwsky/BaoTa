@@ -1,0 +1,958 @@
+<style> 
+    .plugin_body .box_conter {
+        display: none;
+    }
+
+    .plugin_body .box_conter.active {
+        display: block;
+    }
+  
+    .box_table_conter{
+        height: 320px;
+        /*overflow-y: auto;*/
+    }
+    .project_box{
+        margin-bottom: 5px;
+    }
+    .project_logs{
+        margin: 0px;
+        width: 750px;
+        height: 450px;
+        background-color: #424251;
+        overflow: auto;
+        line-height: 22px;
+        color: #fff;
+        padding-left: 10px;
+        font-family: arial;
+        margin-top: 10px;
+        outline: none;
+    }
+    .table_self_conter{
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: bottom;
+    }
+    .table>tbody>tr>td{
+        vertical-align: top;
+    }
+
+    .changepath{
+        height: 500px;
+        border-bottom: 1px solid #dddddd;
+    }
+    .changepath .path-top{
+        height: 50px;
+        line-height: 50px;
+        padding-left: 10px;
+        border-bottom: #dddddd 1px solid;
+    }
+    .changepath .path-con-left{
+        width: 160px;
+        height: 450px;
+        float: left;
+        border-right: #dddddd 1px solid;
+        padding-top: 5px;
+    }
+    .changepath .path-con-left dl .open_disk:hover{
+        background: #ececec;
+        cursor: pointer;
+    }
+    .changepath .path-con-right{
+        float: left;
+        height: 450px;
+        width: 590px;
+        overflow: hidden;
+    }
+
+    .getfile-btn{
+        background: #f7f7f7 none repeat scroll 0 0;
+        padding: 8px 20px 10px;
+        text-align: right;
+        width: 100%;
+        border-top: 0px;
+    }
+    .changepath .path-top .btn span{
+        margin-right: 5px;
+    }
+    .changepath .path-con-left dl dt{
+        height: 40px;
+        line-height: 40px;
+        padding-left: 20px;
+        margin-left: 0;
+        background: none;
+    }
+    .changepath .path-con-left dl dt span{
+        margin-right: 10px;
+    }
+    .file-list .table-hover>tbody>tr{
+        height: 50px;
+        cursor: pointer;
+    }
+    .file-list .table>tbody>tr>td{
+        vertical-align: middle;
+    }
+    .file-list .dir_block{
+        display: inline-block;
+        vertical-align: top;
+        height: 25px;
+        line-height: 25px;
+    }
+    .table_dir .dir_block,
+    .table_files .dir_block{
+        height: 28px;
+        line-height: 28px;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .file-list .list-list span.glyphicon-option-horizontal{
+        height: 30px;
+        line-height: 35px;
+        font-size: 15px;
+    }
+
+    .file-list .list-list span.glyphicon-folder-open{
+        margin-right: 15px;
+        font-size: 23px;
+        margin-left: 4px;
+    }
+    .file-list{
+        display: block;
+        overflow: auto;
+        height: 417px;
+        position: relative;
+        top: -1px;
+    }
+    .label_checkbox{
+        position: relative;
+    }
+    .list-list tr:last-child{
+        border-bottom: 1px solid #ddd;
+    }
+    .divtable .table thead th{
+        border-bottom: 0px solid #e6e6e6;
+    }
+    .table_hide th{
+        padding: 0 !important;
+    }
+    .list-list .ico-default{
+        background-position: center center;
+        background-repeat: no-repeat;
+        /* display: inline-block; */
+        height: 30px;
+        margin-right: 10px;
+        width: 33px;
+        z-index: 1;
+        float: left;
+    }
+    #table_thead{
+        border-bottom: 1px solid #ddd !important;
+    }
+    .path-con-right .list-list td{
+        cursor: auto;
+    }
+    .drop-down{
+        /* display: none; */
+        /* position: absolute; */
+        width: 80px;
+        text-align: center;
+        /* padding: 5px 5px; */
+    }
+    .drop-down .glyphicon.glyphicon-trash{
+        font-size: 12px;
+        color: red;
+        margin-right: 0;
+    }
+    .line .tname{
+        width: 120px
+    }
+    .cnblogs_code{
+        padding: 20px 5px;
+        border:1px solid #e1e1e1;
+        background: #fcfcfc;
+        border-radius: 4px;
+        line-height: 24px;
+    }
+    .cnblogs_code span{
+        display: block;
+        margin-left: 15px;
+        margin-bottom: 0;
+    }
+    .cnblogs_code .code{
+        display: inline-block;
+        margin-left: 0px;
+        margin-bottom: 5px;
+        background: #efefef;
+        padding: 0 8px;
+        border:2px;
+    }
+     .CodeMirror {
+        border: 1px solid #eee;
+        width: 750px;
+        height: 400px;
+        overflow-y: auto;
+    }
+</style>
+<div class="bt-form">
+    <div class="bt-w-main">
+        <!--菜单部分-->
+        <div class="bt-w-menu">
+            <p class="bgw">守护进程管理</p>
+            <p>日志查看</p>
+            <p>配置文件</p>
+        </div>
+        <!--内容部分-->
+        <div class="bt-w-con pd15">
+            <div class="plugin_body">
+                <!-- 项目管理 -->
+                <div class="box_conter active divtable">
+                    <button class="btn btn-success btn-sm va0 mb15 add_python">添加守护进程</button>
+                    <div id="tomcat_fix" class="box_table_conter">
+                        <table class="table table-hover">
+                            <thead><tr><th>名称</th><th style="width: 160px">启动文件</th><th>启动用户</th><th>启动优先级</th><th>进程ID</th><th>状态</th><th style="text-align: right;">操作</th></tr></thead>
+                            <tbody class="python_list"></tbody>
+                        </table>
+                    </div>
+                    <!--<div class="cnblogs_code">
+                        <span>为了方面的使用supervisor进程管理器，请修改一下配置文件，步骤如下：</span>
+                        <span>1：点击"配置文件"，将最后两行（即[include]参数开始）的注释打开</span>
+                        <span>2：将 files 值改成：files = /www/server/panel/plugin/supervisor/profile/*.ini</span></span>
+                    </div>-->
+                </div>
+              
+                <div class="box_conter python_project_logs">
+                    <div class="project_box">
+                        <span style="margin-right: 10px;">守护进程日志</span>
+                        <select class="bt-input-text mr5 project_select" name="project_select" style="width:180px"><option value="0">tomcat7</option></select>
+                    </div>
+                    <textarea class="project_logs"></textarea>
+                </div>
+                
+                <div class="box_conter redis_config_page">
+                    <div class="soft-man-con bt-form">
+                        <p style="color: #666; margin-bottom: 7px">提示：Ctrl+F 搜索关键字，Ctrl+G 查找下一个，Ctrl+S 保存，Ctrl+Shift+R 查找替换!</p>
+                        <textarea class="bt-input-text" style="height: 320px; line-height: 18px; display: none;" id="textBody"></textarea>
+                        <button id="save_config" class="btn btn-success btn-sm" style="margin-top:10px;">保存</button>
+                        <ul class="help-info-text c7"><li>此处为supervisor主配置文件,若您不了解配置规则,请勿随意修改。</li></ul>
+                    </div>
+                </div>
+              
+            </div>
+        </div>
+    </div>
+</div>
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+
+<script>
+    /**
+     * 插件交互对象
+     * 您的所有JS代码可以写在里面
+     * 若不习惯JS的面向对象编程，可删除此对象，使用传统函数化的方式编写
+     * */
+    var python = {
+        plugin_name: 'supervisor',
+        add_python_view:0,
+        version_list:[],
+        project_list:[],
+        user_list:[],
+        project_info:{
+            pjname:'',
+            user:'',
+            rfile:'',
+            param:'',
+        },
+        // 初始化
+        init:function(){
+            var _this = this;
+            $(".layui-layer-page").width(900);
+            $(".bt-w-menu p").click(function () {
+                var index = $(this).index();
+                $(this).addClass('bgw').siblings().removeClass('bgw').parent().next().find('.box_conter').eq(index).addClass('active').siblings().removeClass('active')
+                switch (index) {
+                    // 进程管理
+                    case 0:
+                        _this.create_process_table();
+                    break;
+                    case 1:
+                        _this.create_process_logs();
+                    break;
+                    case 2:
+                        _this.create_supervisor_file_req();
+                    break;
+                }
+            });
+          
+            $('.add_python').click(function () {
+                _this.get_user_list(function(res){
+                    var _option = '';
+                    for(var i = 0; i< res.length;i++){ _option += '<option value="'+ res[i] +'">'+ res[i] +'</option>' }  
+                    python.add_python_view = layer.open({
+                        type: 1,
+                        closeBtn:2,
+                        title:'添加守护进程',
+                        area: '500px', //宽高
+                        btn: ['确定', '取消'],
+                        content:'<div class="bt_conter bt-form pd15" style="height:auto;width:100%;">\
+                                    <div class="line"><span class="tname">名称</span>\
+                                        <div class="info-r c4"><input class="bt-input-text" type="text" name="pjname" placeholder="请输入名称" autocomplete="off" value="" style="width:270px"></div>\
+                                    </div>\
+                                    <div class="line"><span class="tname">启动用户</span>\
+                                        <div class="info-r c4"><select class="bt-input-text mr5 project_version" name="user" style="width:270px">'+ _option +'</select></div>\
+                                    </div>\
+                                    <div class="line"><span class="tname">启动文件</span>\
+                                        <div class="info-r c4"><input class="bt-input-text" id="server_file" type="text" name="rfile" placeholder="请选择启动文件" value="" style="width:270px">\
+                                        <span data-id="path" class="glyphicon cursor ml5 glyphicon-folder-open open_select_item" onclick="python.change_path(\'#server_file\',\'dir\')"></span></div>\
+                                    </div>\
+                                    <div class="line"><span class="tname">启动参数</span>\
+                                        <div class="info-r c4"><input class="bt-input-text" type="text" name="param" placeholder="请选择启动参数" value="" style="width:270px"></div>\
+                                    </div>\
+                                    <ul class="help-info-text c7" style="padding-left: 29px;margin-top:5px;">\
+                                        <li>请正确输入启动文件</li>\
+                                        <li>没有启动参数，可以不填</li>\
+                                    </ul>\
+                                 </div>',
+                        yes:function(index, layero){
+                           for(var i in _this.project_info){
+                                _this.project_info[i] = $('[name="'+ i +'"]').val();
+                                if(_this.project_info[i] == ''){
+                                    if(i == 'pjname'){
+                                        layer.msg('进程名称不能为空');
+                                    }else if(i == 'user'){
+                                        layer.msg('启动用户不能为空');
+                                    }else if(i == 'rfile'){
+                                        layer.msg('启动文件不能为空');
+                                    }
+                                }
+                           }
+                           _this.add_project(_this.project_info,function(res){
+                                if(res.status){
+                                    layer.close(index);
+                                    _this.create_process_table(function(){
+                                        layer.msg(res.msg,{icon:1});
+                                    });
+                                }else{
+                                    layer.msg(res.msg,{icon:2});
+                                }  
+                           })
+                        }
+                    });
+                });
+            });
+            $('.project_select').change(function(){
+                var project_val = $(this).val();
+                _this.get_project_logs({pjname:project_val},function (res){
+                    $('.project_logs').val(res);
+                    var scrollDom = document.getElementsByClassName('project_logs')[0]
+                    scrollDom.scrollTop = scrollDom.scrollHeight;
+                });
+            });
+            this.create_process_table();
+        },
+       
+        // 创建列表
+        create_process_table:function(callback){
+            var _this = this;
+            this.get_process_list(function (rdata){
+                var _html = '';
+                //<td><a href="javascript:openPath(\''+ rdata[i].path +'\');" class="btlink"><span class="path table_self_conter" style="width:180px" title="'+ rdata[i].path +'">'+ rdata[i].path +'</span></a></td>\
+                for(var i = rdata.length - 1; i >= 0; i--){
+                    _html += '<tr>\
+                        <td><span class="table_self_conter" style="width:50px" title="'+ rdata[i].program +'">'+ rdata[i].program +'</span></td>\
+                        <td><span class="path table_self_conter" style="width:180px" title="'+ rdata[i].path +'">'+ rdata[i].path +'</span></td>\
+                        <td><span class="table_self_conter" style="width:auto">'+ rdata[i].user +'</span></td>\
+                        <td><span class="table_self_conter" style="width:auto">'+ rdata[i].priority +'</span></td>\
+                        <td><span class="table_self_conter" style="width:auto">'+ rdata[i].pid +'</span></td>\
+                        <td><a href="javascript:;" class="btlink python_status_click" data-index="'+ i +'">'+ (rdata[i].status == '0'?'<span style="color:red;">已停止 </span><span style="color:red" class="glyphicon glyphicon-pause"></span>':'<span style="color:#5CB85C">已启动 </span><span style="color:#5CB85C" class="glyphicon glyphicon-play"></span>') +'</a></td>\
+                        <td style="text-align:right;">'+'<a href="javascript:;" class="btlink python_restart_click" data-index="'+ i +'">'+(rdata[i].status == '0'?'启动':'重启') +'</a> &nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" class="btlink python_conf_click" data-index="'+ i +'" title="修改配置">修改</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" class="btlink python_del_click" data-index="'+ i +'" title="删除项目">删除</a></td>\
+                    </tr>'
+                }
+                if(rdata.length == 0) {
+                    _html  += '<tr ><td colspan="8">当前没有数据</td></tr>'
+				}
+                $('.python_list').html(_html);
+                setTimeout(function(){
+                    // 状态切换事件
+                    $('.python_status_click').click(function(){
+                        var index = $(this).attr('data-index'),res = _this.project_list[index];
+                        var confirm = layer.confirm('是否'+(res.status == 0?'开启':'关闭')+'守护进程&nbsp;['+ res.program  +']&nbsp;？', {title:'提示',btn: ['确定','取消'],icon:0,closeBtn:2}, function(){
+                            _this.set_project_status(res.status == 0?'start':'stop',{program:res.program},function(res){
+                                if(res.status){
+                                    _this.create_process_table(function(){
+                                        layer.msg(res.msg,{icon:1});
+                                    });
+                                }else{
+                                    layer.msg(res.msg,{icon:2});
+                                }
+                            });
+                        });
+                    });
+                  
+                    // 重启事件
+					$('.python_restart_click').click(function(){
+						var index = $(this).attr('data-index');
+						var res = _this.project_list[index];
+						var confirm = layer.confirm('是否'+(res.status == 0?'启动':'重启')+'守护进程&nbsp;['+ res.program  +']&nbsp;？', {title:'提示',btn: ['确定','取消'],icon:0,closeBtn:2}, function(){
+							if(res.status == 0){
+								_this.set_project_status('start',{program:res.program},function(res){
+									if(res.status){
+                                        _this.create_process_table(function(){
+                                            layer.msg(res.msg,{icon:1});
+                                        });
+                                    }else{
+                                        layer.msg(res.msg,{icon:2});
+                                    }
+								});
+							}else{
+								_this.set_project_status('stop',{program:res.program},function(){
+									if(res.status){
+										setTimeout(function(){ 
+											_this.set_project_status('start',{program:res.program},function(res){
+                                                _this.create_process_table(function(){
+                                                    layer.msg(res.msg,{icon:1});
+                                                });
+                                            });
+										},500);
+                                    }else{
+                                        layer.msg(res.msg,{icon:2});
+                                    }
+								});
+							}
+						});
+					});
+                  
+                    // 修改事件
+                    $('.python_conf_click').click(function () {
+                        var index = $(this).attr('data-index'),res = _this.project_list[index];
+                        _this.get_progress_info({program:res.program}, function(res){
+                            var daemoninfo = res.daemoninfo;
+                            var userlist = res.userlist
+                            var name = daemoninfo.program
+                            var user = daemoninfo.user; 
+                            var priority = daemoninfo.priority; 
+                            var option = '';
+                            for(var i = 0; i< userlist.length;i++){ 
+                                if(userlist[i]==user){ option += '<option value="'+ userlist[i] +'" selected="selected">'+ userlist[i] +'</option>' }
+                                else{ option += '<option value="'+ userlist[i] +'">'+ userlist[i] +'</option>'}
+                            }  
+                            python.add_python_view = layer.open({
+                                type: 1,
+                                closeBtn:2,
+                                title:'修改守护进程',
+                                area: '500px', //宽高
+                                btn: ['确定', '取消'],
+                                content:'<div class="bt_conter bt-form pd15" style="height:auto;width:100%;">\
+                                            <div class="line"><span class="tname">名称</span>\
+                                                <div class="info-r c4"><input class="bt-input-text" type="text" name="program" placeholder="请输入进程名称" autocomplete="off" value="'+ name +'" style="width:270px" readonly="true"></div>\
+                                            </div>\
+                                            <div class="line"><span class="tname">启动用户</span>\
+                                                <div class="info-r c4"><select class="bt-input-text mr5 project_version" name="user" style="width:270px">'+ option +'</select></div>\
+                                            </div>\
+                                            <div class="line"><span class="tname">启动优先级</span>\
+                                                <div class="info-r c4"><input class="bt-input-text" type="text" name="priority" placeholder="请输入进程优先级" autocomplete="off" value="'+ priority +'" style="width:270px"></div>\
+                                            </div>\
+                                            <ul class="help-info-text c7" style="padding-left: 29px;margin-top:5px;">\
+                                                <li>进程启动优先级，默认999，值越小，越优先启动</li>\
+                                            </ul>\
+                                         </div>',
+                                yes:function(index, layero){
+                                    var use = $('[name="user"]').val();
+                                    var level = $('[name="priority"]').val();                                                     
+                                    _this.update_project({pjname:name,level:level,user:use},function(res){
+                                        if(res.status){
+                                            layer.close(index);
+                                            _this.create_process_table(function(){
+                                                layer.msg(res.msg,{icon:1});
+                                            });
+                                        }else{
+                                            layer.msg(res.msg,{icon:2});
+                                        }  
+                                   })
+                                }
+                            });    
+                        });
+                    });
+                    
+                    // 删除事件
+                    $('.python_del_click').click(function(){
+                        var i = $(this).attr('data-index');
+                        var res = _this.project_list[i];
+                        var confirm = layer.confirm('是否删除守护进程&nbsp;['+ res.program  +']&nbsp;？', {title:'提示',btn: ['确定','取消'],icon:0,closeBtn:2}, function(){
+                            _this.del_project({program:res.program},function(res){
+                                if(res.status){
+                                    _this.create_process_table(function(){
+                                        layer.msg(res.msg,{icon:1});
+                                    });
+                                }else{
+                                    layer.msg(res.msg,{icon:2});
+                                }
+                            });
+                        });
+                    });
+                    if(callback) callback();
+                },500);
+            });
+        },
+          
+        // 获取进程列表
+        get_process_list:function(callback){
+            var _this = this;
+            this.send({
+                method:'GetPorcessList',
+                tips:'正在获取进程列表，请稍后...',
+                success:function(res){
+                    if(res.status === false){
+                        layer.msg(res.msg,{icon:2});
+                        return false;
+                    } 
+                    _this.project_list = res;
+                    if(callback) callback(res);
+                }
+            });
+        },
+          
+        // 获取用户列表  
+        get_user_list:function(callback){
+            var _this = this;
+            this.send({
+                method:'GetUserList',
+                tips:'正在获取用户列表，请稍后...',
+                success:function(res){
+                    _this.user_list = res;
+                    if(callback) callback(res);
+                }
+            });
+        },
+         
+        // 添加守护进程
+        add_project:function(data,callback){
+            this.send({
+                method:'AddProcess',
+                data:data,
+                tips:'正在添加守护进程，请稍后...',
+                success:function(res){
+                    if(callback) callback(res);
+                }
+            })
+        },
+    
+        // 设置进程状态
+        set_project_status:function(type,data,callback){
+            var status = type == 'start'?'StartProcess':'StopProcess';
+            this.send({
+                method:status,
+                data:data,
+                tips:'正在'+ (type == 'start'?'启动守护进程':'关闭守护进程') +',请稍后...',
+                success:function(res){
+                    if(callback) callback(res);
+                }
+            });
+        },
+        
+        // 修改进程  
+        update_project:function(data,callback){
+            this.send({
+                method:'UpdateProcess',
+                data:data,
+                tips:'正在修改守护进程,请稍后...',
+                success:function(res){
+                    if(callback) callback(res);
+                }
+            });
+        },
+       
+        // 删除进程
+        del_project:function(data,callback){
+            this.send({
+                method:'RemoveProcess',
+                data:data,
+                tips:'正在删除守护进程,请稍后...',
+                success:function(res){
+                    if(callback) callback(res);
+                }
+            });
+        },
+          
+        // 创建进程日志
+        create_process_logs:function(){
+            var _html = '';
+            for(var i = this.project_list.length -1 ; i >= 0 ;i--){
+                _html += '<option value="'+ this.project_list[i].program +'">'+ this.project_list[i].program +'</option>';
+            }
+            $('.project_select').html(_html);
+            this.get_project_logs({pjname: $('.project_select').val()},function(res){
+                $('.project_logs').val(res);
+                var scrollDom = document.getElementsByClassName('project_logs')[0]
+                scrollDom.scrollTop = scrollDom.scrollHeight;
+            })
+        },
+        // 获取进程日志
+        get_project_logs:function(data,callback){
+            this.send({
+                method:'GetProjectLog',
+                load:2,
+                msg:false,
+                data:data,
+                success:function(res){
+                    if(callback) callback(res);
+                }
+            });
+        },
+          
+        // 创建文件配置页面
+        create_supervisor_file_req:function(){
+            var _this = this;
+            this.get_supervisor_file_req({path:'/etc/supervisor/supervisord.conf'},function(res){
+                $('#textBody').val(res.data);
+                $('.CodeMirror').remove();
+                _this.edit_codeMirror = CodeMirror.fromTextArea(document.getElementById("textBody"), {
+                    extraKeys: { "Ctrl-Space": "autocomplete" },
+                    lineNumbers: true,
+                    matchBrackets: true,
+                });
+                $('#save_config').click(function(){
+                    var data = _this.edit_codeMirror.getValue();
+                    _this.save_supervisor_file_req({data:data,path:'/etc/supervisor/supervisord.conf'});
+                });
+            });
+        },  
+        // 获取配置文件（请求）
+        get_supervisor_file_req: function (obj, callback) {
+            this.send({
+                method: 'GetSupervisorFile',
+                data:{path:obj.path},
+                tips: '正在获取配置文件，请稍后...',
+                success: function (res) {
+                    if (!res.status) {
+                        layer.msg(res.msg, {
+                            icon: 2
+                        });
+                        return false;
+                    }
+                    if (callback) callback(res);
+                }
+            })
+        },
+        // 保存配置文件（请求）
+        save_supervisor_file_req: function (obj, callback) {
+            this.send({
+                method: 'SaveSupervisorFile',
+                data: {data:obj.data,path:obj.path,encoding:'utf-8'},
+                tips: '正在保存配置文件，请稍后...',
+                success: function (res) {
+                    layer.msg(res.msg,{icon:res.status?1:2});
+                    if (!res.status) {
+                        return false;
+                    }
+                    if (callback) callback(res);
+                }
+            })
+        },
+          
+        // 获取当前进程信息  
+        get_progress_info: function (data, callback) {
+            this.send({
+                method: 'GetProgressInfo',
+                data: data,
+                tips: '正在获取进程信息，请稍后...',
+                success: function (res) {         
+                    if (callback) callback(res);
+                }
+            })
+        },
+       
+        // 选择目录
+        change_path:function(el,type) {
+            var _this = this;
+            layer.open({
+                type: 1,
+                area: "750px",
+                title: type == 'files'?'选择项目启动文件':'选择项目目录',
+                closeBtn: 2,
+                shift: 5,
+                shadeClose: false,
+                content: "<div class='changepath'>\
+                            <div class='path-top'>\
+                                <button type='button' class='btn btn-default btn-sm btn-back-file'><span class='glyphicon glyphicon-share-alt'></span>"+lan.public.return+"</button>\
+                                <div class='place' id='PathPlace'>"+ lan.bt.path +"：<span></span></div>\
+                            </div>\
+                            <div class='path-con'>\
+                                <div class='path-con-left'>\
+                                    <dl><dt id='changecomlist' onclick='BackMyComputer()'><span class='glyphicon glyphicon-hdd'></span>"+ lan.bt.comp  +"</dt></dl>\
+                                </div>\
+                                <div class='path-con-right'>\
+                                    <ul class='default' id='computerDefautl'></ul>\
+                                    <div class='divtable'>\
+                                        <table class='table table-hover' id='table_thead' style='border:0 none'>\
+                                            <thead><tr class='file-list-head'><th width='6%'></th><th width='30%'>"+lan.bt.filename+"</th><th width='25%'>"+lan.bt.etime+"</th><th width='10%'>"+lan.bt.access+"</th><th width='10%'>"+lan.bt.own+"</th><th width='10%'></th></tr></thead>\
+                                        </table>\
+                                    </div>\
+                                    <div class='file-list divtable'>\
+                                        <table class='table table-hover' style='border:0 none;margin-top: -32px;'>\
+                                            <thead><tr class='file-list-head'><th width='6%'></th><th width='30%'>"+lan.bt.filename+"</th><th width='25%'>"+lan.bt.etime+"</th><th width='10%'>"+lan.bt.access+"</th><th width='10%'>"+lan.bt.own+"</th><th width='10%'></th></tr></thead>\
+                                            <tbody id='dir_tbody' class='list-list'></tbody>\
+                                        </table>\
+                                    </div>\
+                                </div>\
+                            </div>\
+                        </div>\
+                        <div class='getfile-btn' style='margin-top:0'>\
+                            <button type='button' class='btn btn-default btn-sm pull-left btn_create_folder'>"+ lan.bt.adddir +"</button>\
+                            <button type='button' class='btn btn-danger btn-sm mr5 btn_close'>"+ lan.public.close +"</button>\
+                            <button type='button' class='btn btn-success btn-sm btn_path_ok'>"+ lan.bt.path_ok +"</button>\
+                        </div>",
+                success:function(layero,index){
+                    //设置文件目录
+                    switch(type){
+                        case 'dir':
+                            setCookie('file_paths',$(el).val());
+                        break;
+                        case 'files':
+                            setCookie('file_paths',_this.back_file());
+                        case 'other':
+                        break;
+                    }
+                    // 返回目录
+                    $('.btn-back-file').click(function(){
+                        setCookie('file_paths',_this.back_file());
+                        _this.get_dir_dom(type);
+                    });
+                    // 关闭layer
+                    $('.btn_close').click(function(){
+                        layer.close(index);
+                    });
+                    // 选择目录或文件
+                    $('.btn_path_ok').click(function(){
+                        var file_name = $('#dir_tbody .ui-selected').find('.open_files_event').attr('data-name');
+                        var types = $('#dir_tbody .ui-selected').find('.open_files_event').attr('data-type');
+                        switch(type){
+                            case 'dir':
+                                if(file_name == undefined) file_name = '';
+                            break;
+                            case 'files':
+                                if($('#dir_tbody .ui-selected').length == 0) layer.msg('请选择文件',{icon:2}); return false;
+                            break;
+                            case 'other':
+                                if(file_name == undefined) file_name = '';
+                            break;
+                        }
+                       var paths = getCookie('file_paths');
+                       var paths_arry = paths.split('/');
+                       if(paths_arry[paths_arry.length -1] != ''){
+                            paths += '/'
+                       }
+                        $(el).val( paths + ( file_name == ''?'':file_name));
+                        layer.close(index)
+                    });
+                    // 新建文件夹
+                    $('.btn_create_folder').click(function(){
+                        var isCreate = $('#dir_tbody tr:eq(0)').hasClass('table_add_dir');
+                        if(isCreate) return false;
+                        $('#dir_tbody').prepend('<tr class="table_add_dir">\
+                                <td></td><td colspan="2"><span class="glyphicon glyphicon-folder-open"></span><input class="newFolderName" type="text" value="" style="width: 250px;height: 30px;vertical-align: bottom;">\
+                                <td colspan="3"><button type="button" class="btn btn-success btn-sm newFolderEvent">确定</button>&nbsp;&nbsp;<button type="button" class="btn btn-default btn-sm newFolderClaer">取消</button></td>\
+                            </td></tr>');
+                        document.getElementsByClassName('file-list')[0].scrollTop = 0;
+                        setTimeout(function(){
+                            $('.table_add_dir').on('click','.newFolderEvent',function(e){
+                                var fileName = $('.newFolderName').val();
+                                if(fileName == ''){
+                                    layer.msg('请输入新建文件名称',{icon:0});
+                                    return false;
+                                }
+                                _this.new_folder_event(getCookie('file_paths') + '/' + fileName,function(res){
+                                    $(this).parent().parent().remove();
+                                    _this.get_dir_dom(type);
+                                });
+                                e.stopPropagation();
+                            });
+                            $('.table_add_dir').on('click','.newFolderClaer',function(e){
+                                $(this).parent().parent().remove();
+                                e.stopPropagation();
+                            });
+                        },500);
+                    });
+                    // 磁盘目录跳转
+                    $('.path-con-left').on('click','.open_disk',function(){
+                       var dir =  $(this).attr('data-dir');
+                       setCookie('file_paths',dir)
+                        _this.get_dir_dom(type);
+                    });
+                    // 选择文目录或文件
+                    $('#dir_tbody').on('click','tr',function(e){
+                        $(this).find('input[type="checkbox"]').click();
+                        e.stopPropagation();
+                    });
+                    // 选择文件或目录
+                    $('#dir_tbody').on('click','tr input[type="checkbox"]',function(e){
+                        var checked = $(this).prop('checked');
+                        if(!checked){
+                            _this.select = '';
+                            $(this).parent().parent().removeClass('ui-selected');
+                        }else{
+                            _this.select = $(this).attr('data-name');
+                            $(this).parent().parent().addClass('ui-selected').siblings().removeClass('ui-selected').find('input').prop('checked',false);
+                        }
+                        e.stopPropagation();
+                    });
+                    // 跳转指定目录，获取选择文件
+                    $('#dir_tbody').on('click','.open_files_event',function(e){
+                        var type = $(this).attr('data-type');
+                        var name = $(this).attr('data-name');
+                        var path = getCookie('file_paths');
+                        if(type == 'dir'){
+                            setCookie('file_paths',path + '/' + name);
+                            _this.get_dir_dom(type);
+                        }else{
+                            $(this).parent().prev().find('input[type="checkbox"]').click();
+                        }
+                        e.stopPropagation();
+                    })
+                    // 跳转指定目录
+                    $('#dir_tbody').on('click','.open_files_event .path-con-left dl',function(e){
+                        var path = $(this).attr('data-name');
+                        e.stopPropagation();
+                    });
+                    // 跳转指定下一层目录
+                    $('#dir_tbody').on('dblclick','tr',function(e){
+                        $(this).find('.open_files_event').click();
+                        e.stopPropagation();
+                    });
+                    //获取目录DOM
+                    _this.get_dir_dom(type);
+                }
+            });
+        },
+        // 过滤一级目录
+        back_file:function(){
+            c = getCookie('file_paths');
+            if(c == '/') return '/'
+            if(c.substr(c.length - 1, 1) == "/") {
+                c = c.substr(0, c.length - 1)
+            }
+            var d = c.split("/");
+            var a = "";
+            if(d.length > 1) {
+                var e = d.length - 1;
+                for(var b = 0; b < e; b++) {
+                    a += d[b] + "/"
+                }
+                return a.replace("//", "/")
+            } else {
+                a = d[0]
+            }
+            if(d.length == 1) {}
+        },
+        // 获取后缀
+        obtain_suffix:function(fileName){
+            var extArr = fileName.split(".");	
+            var exts = ['folder','folder-unempty','sql','c','cpp','cs','flv','css','js','htm','html','java','log','mht','php','url','xml','ai','bmp','cdr','gif','ico','jpeg','jpg','JPG','png','psd','webp','ape','avi','flv','mkv','mov','mp3','mp4','mpeg','mpg','rm','rmvb','swf','wav','webm','wma','wmv','rtf','docx','fdf','potm','pptx','txt','xlsb','xlsx','7z','cab','iso','rar','zip','gz','bt','file','apk','bookfolder','folder','folder-empty','folder-unempty','fromchromefolder','documentfolder','fromphonefolder','mix','musicfolder','picturefolder','videofolder','sefolder','access','mdb','accdb','sql','c','cpp','cs','js','fla','flv','htm','html','java','log','mht','php','url','xml','ai','bmp','cdr','gif','ico','jpeg','jpg','JPG','png','psd','webp','ape','avi','flv','mkv','mov','mp3','mp4','mpeg','mpg','rm','rmvb','swf','wav','webm','wma','wmv','doc','docm','dotx','dotm','dot','rtf','docx','pdf','fdf','ppt','pptm','pot','potm','pptx','txt','xls','csv','xlsm','xlsb','xlsx','7z','gz','cab','iso','rar','zip','bt','file','apk','css'];
+            var extLastName = extArr[extArr.length - 1];
+            for(var i=0; i<exts.length; i++){
+                if(exts[i]==extLastName){
+                    return exts[i];
+                }
+            }
+            return 'file';
+        },
+        // 生成列表DOM
+        get_dir_dom:function(type){
+            var _this = this;
+            this.get_dirk_list(function(res) {
+                $('.path-con-right .file-list').show();
+                var dir = res.DIR,files = res.FILES,disk = res.DISK,path = res.PATH,page = res.PAGE,dir_html ='',files_html = '',disk_html = '';
+                for(var i=0; i<dir.length; i++){
+                    var dir_arry = dir[i].split(';');
+                    dir_html += '<tr class="table_dir"><td class="label_checkbox"><input type="checkbox" name="dir_input" data-name="'+ dir_arry[0] +'"/></td><td><a href="javascript:;" data-name="'+ dir_arry[0] +'" data-type="dir" class="open_files_event"><span class="glyphicon glyphicon-folder-open"></span><span class="dir_block" style="width:130px;">'+ dir_arry[0] +'</span></td><td>'+ getLocalTime(dir_arry[2]) +'</td><td>'+ dir_arry[3] +'</td><td>'+ dir_arry[4] +'</td><td style="text-align: center;"><span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></td></tr>'
+                }
+                for(var j=0;j<files.length;j++){
+                    var files_arry = files[j].split(';');
+                    files_html += '<tr class="table_files"><td class="label_checkbox"><input type="checkbox" name="dir_input" data-name="'+ files_arry[0] +'"/></td><td><a href="javascript:;"  data-name="'+ files_arry[0] +'" data-type="file" class="open_files_event"><span class="ico-default ico-'+ _this.obtain_suffix(files_arry[0]) +'"></span><span class="dir_block" style="width:130px;">'+ files_arry[0] +'</span></a></td><td>'+ getLocalTime(files_arry[2]) +'</td><td>'+ files_arry[3] +'</td><td>'+ files_arry[4] +'</td><td style="text-align: center;position: relative;"><span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></td></tr>'
+                }
+                for(var z=0;z<disk.length;z++){
+                    var disk_info = disk[z];
+                    var dir_list = disk_info.path.split('/');
+                    dir_list = dir_list[dir_list.length -1];
+                    disk_html += '<dt class="open_disk" data-dir="'+ disk_info.path +'"><span class="glyphicon glyphicon-hdd"></span>'+ (disk_info.path == '/'?'根目录 ('+ disk_info.size[2] +')':'<span class="table_self_conter" style="width:100px" title="'+ disk_info.path +' ('+ disk_info.size[2] +')">'+ dir_list +' ('+ disk_info.size[2] +')</span>') +'</dt>'
+                }
+                setCookie('file_paths',path);
+                $('.changepath .path-con-left dl').html(disk_html);
+                $('#dir_tbody').html(dir_html+files_html);
+                $('#PathPlace span').html(path);
+            });
+        },
+        // 新建文件事件
+        new_folder_event:function(path,callback){
+            this.send({
+                url:'/files?action=CreateDir',
+                tips:'正在新建文件，请稍后...',
+                data:{path:path},
+                success:function(res){
+                    if(callback)callback(res);
+                }
+            })
+        },
+        // 获取文件列表
+        get_dirk_list:function(callback){
+            var dir = getCookie('file_paths');
+            dir = dir.replace(/\/\//g, "/");
+            this.send({
+                url:'/files?action=GetDir',
+                tips:'正在获取文件列表，请稍后...',
+                data:{path:dir,disk:'True'},
+                success:function(res){
+                    if(callback)callback(res);
+                }
+            })
+        },
+        // 请求封装
+        send: function (obj) {
+            var loadT = '';
+            if (obj.load == undefined) obj.load = 0;
+            if (obj.url == undefined){
+                if (obj.plugin_name === undefined && this.plugin_name !== undefined) obj.plugin_name = this.plugin_name
+                if (!obj.plugin_name || !obj.method) {
+                    layer.msg('插件类名称，或插件方法名称缺失!', {
+                        icon: 2
+                    });
+                    return false;
+                }
+            }
+            if (obj.load === 0) {
+                loadT = layer.msg(obj.tips, {
+                    icon: 16,
+                    time: 0,
+                    shade: 0.3
+                });
+            } else if (obj.load === 1 || (obj.tips == undefined && obj.load == undefined)) {
+                loadT = layer.load();
+            }
+            $.ajax({
+                type: 'POST',
+                url: obj.url != undefined ? obj.url : ('/plugin?action=a&name=' + obj.plugin_name + '&s=' + obj.method),
+                data: obj.data || {},
+                timeout: obj.timeout || 99999999,
+                complete: function (res) {
+                    if (obj.load === 0 || obj.load === 1) layer.close(loadT);
+                },
+                success: function (rdata) {
+                    if (!obj.success) {
+                        obj.msg || obj.msg == undefined?layer.msg(rdata.msg, {icon: rdata.status ? 1 : 2}):'';
+                        return;
+                    }
+                    obj.success(rdata);
+                },
+                error: function (ex) {
+                    if (!obj.error) {
+                        obj.msg || obj.msg == undefined?layer.msg('请求过程发现错误!', {icon: 2}):'';
+                        return;
+                    }
+                    return obj.error(ex);
+                }
+            });
+        }
+    }
+    python.init();
+</script>

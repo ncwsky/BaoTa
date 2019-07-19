@@ -1,0 +1,311 @@
+<style>
+
+a{ color:#555; text-decoration:none;}
+img{ border:none;}
+li{ list-style:none;}
+#plugin_index {width: 843px;}
+.clearfix:after {visibility: hidden;display: block;font-size: 0;content: " ";clear: both;height: 0;}
+* html .clearfix             { zoom: 1; } /* IE6 */
+*:first-child+html .clearfix { zoom: 1; } /* IE7 */
+.iteminfo_parameter dt{ margin-left:-70px; float:left; display:inline; width:5px; white-space:nowrap; text-align:right; color:#888;}
+.sys_item_spec dl.iteminfo_parameter{ }
+.sys_item_spec dl.iteminfo_parameter dt{ line-height:32px;}
+.sys_spec_img{}
+.sys_spec_img li{ float:left; height:220px; position:relative; margin:25px 35px 0px 0;text-align:center}
+.sys_spec_img li a{ width:184px;height:204px; padding:1px; border:1px solid #ccc; float:left; background:#fff; display:inline-block; outline:none;}
+.sys_spec_img li a img{ width:180px; height:200px; display:block;}
+.sys_spec_img li a:hover{ border:2px solid #0da83d; padding:0; text-decoration:none;}
+.sys_spec_img li i{ position:absolute; width:25px; height:25px; font-size:0; line-height:0; right:0px; bottom:16px; background:url(https://www.dnpw.org/cn/404/bt/selected.png) no-repeat right bottom; z-index:99; display:none;}
+.sys_spec_img li.selected a{ border:2px solid #0da83d; padding:0;}
+.sys_spec_img li.selected i{ display:block;}
+#plugin_about {font-size: larger}
+.f-right {float:right;}
+.f-left {float:left; }
+#plugin_sys_update {width:843px;display:inline-block}
+#demoid_4,#demoid_8,#demoid_12,#demoid_16,#demoid_20,#demoid_24,#demoid_28,#demoid_32,#demoid_36 {margin-right:0 !important}
+.demo_link {display: block; margin-top: 215px;}
+.demo_link a{border:none !important;  height:20px !important;}
+.rscroll {margin-left: 110px;position: relative;overflow-y: scroll;height: 555px;}
+</style>
+<div class="bt-form">
+    <div class="bt-w-main">
+        <!--菜单部分-->
+        <div class="bt-w-menu">
+            <p class="bgw" onclick="plugin.get_index()">设置</p>
+             <p class="" onclick="plugin.get_about()">关于</p>
+        </div>
+        <!--内容部分-->
+        <div class="bt-w-con pd15 rscroll">
+            <div class="plugin_body" id="plugin_index" style="display: none">
+                <div id="plugin_sys_update">
+				
+				<div class="f-left">请选择站点和你喜欢的样式:</div>
+				<div class="f-right">总数：<span id="demo_num"></span>&nbsp;&nbsp;&nbsp;最后更新：<span id="demo_update"></span></div>
+
+				</div>
+				
+				<hr/>
+                <div id="plugin_sys_list">选择站点:&nbsp;&nbsp;&nbsp;<select id="site_select" class="bt-input-text mr5" onchange="plugin.site_select_change()" style="width: 45%"></select>&nbsp;&nbsp;&nbsp;
+				<span class="f-right">
+				 <button onclick="plugin.site_install()" class="btn btn-success btn-sm va0" type="button">一键配置</button>&nbsp;&nbsp;&nbsp;<button onclick="plugin.site_uninstall()"  class="btn btn-danger btn-sm va0" type="button">关闭公益404</button>
+				 </span></div>
+      
+                <div id="plugin_sys_demo"  class="iteminfo_buying">
+	               <div class="sys_item_spec">
+		               <dl class="clearfix iteminfo_parameter sys_item_specpara">
+			              <dd>
+				            <ul class="sys_spec_img" id="sys_demo_img_list">
+				            </ul>
+			             </dd>
+                       </dl>
+                   </div>
+                </div><hr/>
+            </div>
+            <div class="plugin_body" id="plugin_about" style="display: block;">
+                 <div id="404_logo" align="center"><img src="https://www.dnpw.org/cn/images/logos/logo-3.png"></div><br/>
+                 <div id="404_dev" >
+                    <table align="left"  style="position:absolute; left:40%" border="0">
+                        <tr ><td>版本：1.0</td></tr>
+                        <tr ><td>&nbsp;</td></tr>
+                        <tr ><td>开发人员：iw3c.top 热心贡献</td></tr>
+                        <tr ><td>&nbsp;</td></tr>
+                        <tr ><td>网站：http://dnpw.org</td></tr>
+                    </table>
+                </div>
+                <div  style="position:absolute; top:250px;width: 848px;padding: 20px 123px;">
+			<p>· 域名公益目的于号召全世界的闲置域名指向域名公益网，通过在线广告及其他附带服务产生收益，并将其捐给联合国儿童基金会的公益项目。如果你有闲置域名，请使用CNAME方式把它指向<span style="color:#0da83d">DO.DNPW.ORG</span>即可参与本公益，也可以注册本站账户后进行多个域名展示和售卖。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--JS脚本部分，不要将JS脚本写在其它地方-->
+<script type="text/javascript">
+
+    //定义窗口尺寸
+    $('.layui-layer-page').css({ 'width': '1000px' });
+
+    //左测菜单切换效果
+    $(".bt-w-menu p").click(function () {
+        $(this).addClass('bgw').siblings().removeClass('bgw')
+    });
+
+    /**
+     * 插件交互对象
+     * 您的所有JS代码可以写在里面
+     * 若不习惯JS的面向对象编程，可删除此对象，使用传统函数化的方式编写
+     * */
+    var plugin = {
+        //构造设置界面内容
+        get_index: function ()
+        {
+            $("#plugin_about").css("display","none");
+             $("#plugin_index").css("display","block");
+            plugin.site_list();
+            $.ajax({
+                type:"GET",
+                url:" https://www.dnpw.org/cn/404/api.php?m=getdata",
+                timeout:3600,
+                success:function(rdata)
+                {
+
+                    var num=rdata[0]['total'];
+                    var update=rdata[0]['last_update'];
+                    $("#demo_num").html(num)
+                    $("#demo_update").html(update)
+                    var imglist="";
+                    for(var i=0;i<num;i++)
+                    {
+                        imglist=imglist+'<li demoid="'+rdata[0]['list'][i]['id']+'" id="demoid_'+rdata[0]['list'][i]['id']+'" url="'+rdata[0]['list'][i]['demo']+'" ><a href="javascript:;"><img src="'+rdata[0]['list'][i]['thumb']+'"/></a><i></i><span class="demo_link"><a href="'+rdata[0]['list'][i]['demo']+'" target="_blank">'+rdata[0]['list'][i]['name']+'</a></span></li>'
+                    }
+                        $("#sys_demo_img_list").html(imglist)
+                     plugin.get_site_info("all");
+                        $(".sys_item_spec .sys_item_specpara").each(function(){
+                        var i=$(this);var p=i.find("ul>li");
+		                p.click(function(){
+			            if(!!$(this).hasClass("selected")){
+				        $(this).removeClass("selected");
+				        i.removeAttr("data-attrval");
+			            }else{$(this).addClass("selected").siblings("li").removeClass("selected");
+				        i.attr("data-attrval",$(this).attr("data-aid"))
+			           }})})
+
+
+                }
+            })
+        },
+        get_about:function()
+        {   $("#plugin_index").css("display","none");
+             $("#plugin_about").css("display","block");
+        },
+
+        //获取当前服务器上的网站列表
+        //后端返回
+        // @name 网站的站点名称
+        // @ps   网站的备注信息
+        site_list:function()
+        {
+            request_plugin("publicwelfare404","site_list","",function(rdata){
+                //直接返回 python 字典时BT会自动json编码，这里无需解json
+                if (rdata['status']=="success")
+                {
+                    var option='<option siteps="全部站点" value="all">全部站点</option>';
+                    for(var i=0;i<rdata['num'];i++)
+                    {
+                        option=option+'<option siteps="'+rdata['sites'][i]['ps']+'" value="'+rdata['sites'][i]['name']+'">'
+                        option=option +rdata['sites'][i]['name']+'</option>';
+                    }
+                    $("#site_select").html(option);
+                }
+                else layer.msg("请求过程发生了错误",{icon:5});
+            });
+        }
+        ,
+        site_install:function () {
+             var ps=$("#site_select").find("option:selected").attr("siteps");
+             var site=$("#site_select").val();
+             var demoid="";
+             var demourl="";
+            $(".sys_item_spec .sys_item_specpara").each(function(){
+                var i=$(this);
+                var p=i.find("ul>li");
+                p.each(function () {
+                   // console.log($(this));
+                    var j=$(this);
+                        if(j.hasClass("selected")){
+                    demoid=j.attr("demoid");
+                    demourl=j.attr("url");}
+                });
+
+            });
+            var data="site="+site+"&demoid="+demoid+"&demourl="+demourl;
+              request_plugin("publicwelfare404","site_install",data,function(rdata){
+                //直接返回 python 字典时BT会自动json编码，这里无需解json
+                if (rdata['status']=="success")
+                {
+                   plugin.http_server_reload();
+                }
+                else layer.msg("请求过程发生了错误",{icon:5});
+            });
+        }
+        ,
+        site_uninstall:function()
+        {
+
+             var ps=$("#site_select").find("option:selected").attr("siteps");
+             var site=$("#site_select").val();
+             var demoid="";
+             var demourl="";
+            var data="site="+site;
+              request_plugin("publicwelfare404","site_uninstall",data,function(rdata){
+                //直接返回 python 字典时BT会自动json编码，这里无需解json
+                if (rdata['status']=="success")
+                {
+                   plugin.http_server_reload();
+                }
+                else layer.msg("请求过程发生了错误",{icon:5});
+            });
+        },
+        site_select_change:function()
+        {
+              var ps=$("#site_select").find("option:selected").attr("siteps");
+              var site=$("#site_select").val()
+              $("#site_ps").html(ps);
+              plugin.get_site_info(site)
+
+        }
+        ,
+        get_site_info:function(site)
+        {
+            var data="site="+site;
+              request_plugin("publicwelfare404","site_info",data,function(rdata){
+                  console.log(rdata['demoid']);
+                  if(rdata['demoid']!="-1")
+                  {
+                      $(".sys_item_spec .sys_item_specpara").each(function(){
+                          var i=$(this);
+                          var p=i.find("ul>li");
+                          p.removeClass("selected");
+                          $("#demoid_"+rdata['demoid']).addClass("selected").siblings("li").removeClass("selected");
+                      });
+                  }
+                  else
+                  {
+                       $(".sys_item_spec .sys_item_specpara").each(function(){
+                          var i=$(this);
+                          var p=i.find("ul>li");
+                          p.removeClass("selected");
+                      });
+                  }
+              });
+
+        },
+        http_server_reload:function()
+        {
+            var server=getCookie("serverType");
+            var data="name="+server+"&type=reload";
+            $.ajax(
+                {
+                    type:"POST",
+                    url:"system?action=ServiceAdmin",
+                    data: data,
+                    timeout:3600,
+                    success: function(rdata)
+                    {
+                        layer.msg("配置成功！",{icon:1});
+                    },
+                    error:function () {
+                        layer.msg("配置过程中发生了错误！",{icon:5});
+                    }
+                }
+            );
+        },
+
+
+
+
+
+
+    }
+
+    /**
+     * 发送请求到插件
+     * 注意：除非你知道如何自己构造正确访问插件的ajax，否则建议您使用此方法与后端进行通信
+     * @param plugin_name    插件名称 如：demo
+     * @param function_name  要访问的方法名，如：get_logs
+     * @param args           传到插件方法中的参数 请传入数组，示例：{p:1,rows:10,callback:"demo.get_logs"}
+     * @param callback       请传入处理函数，响应内容将传入到第一个参数中
+     */
+    function request_plugin(plugin_name, function_name, args, callback, timeout) {
+        if (!timeout) timeout = 3600;
+        $.ajax({
+            type:'POST',
+            url: '/plugin?action=a&s=' + function_name + '&name=' + plugin_name,
+            data: args,
+            timeout:timeout,
+            success: function(rdata) {
+                if (!callback) {
+                    layer.msg(rdata.msg, { icon: rdata.status ? 1 : 2 });
+                    return;
+                }
+                return callback(rdata);
+            },
+            error: function(ex) {
+                if (!callback) {
+                    layer.msg('请求过程发现错误!', { icon: 2 });
+                    return;
+                }
+                return callback(ex);
+            }
+        });
+    }
+
+
+    function getCookie(name) {var cookies = document.cookie;var list = cookies.split("; ");for(var i = 0; i < list.length; i++) {var arr = list[i].split("=");if(arr[0] == name) return decodeURIComponent(arr[1]);} return "";}
+
+
+    //第一次打开窗口时调用
+    plugin.get_index();
+
+</script>

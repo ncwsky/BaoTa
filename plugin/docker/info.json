@@ -1,0 +1,15 @@
+{
+	"title":"Docker管理器",
+	"tip":"lib",
+	"name":"docker",
+	"type":"扩展",
+	"ps":"Docker 是一个开源的应用容器引擎",
+	"versions":"2.0",
+	"shell":"install.sh",
+	"checks":"/www/server/panel/plugin/docker",
+	"author":"宝塔",
+	"home":"http://www.bt.cn/bbs",
+	"date":"2018-12-17",
+	"default":false,
+	"display":0
+}

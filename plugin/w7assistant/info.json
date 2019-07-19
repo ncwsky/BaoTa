@@ -1,0 +1,9 @@
+{
+  "title": "微擎助手",
+  "name": "w7assistant",
+  "ps": "针对微擎系统提供安全加固、重置管理员密码等常用操作。",
+  "versions": "3.3",
+  "checks": "/www/server/panel/plugin/w7assistant",
+  "author": "超人",
+  "home": "https://www.bt.cn"
+}

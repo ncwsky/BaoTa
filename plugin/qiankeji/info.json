@@ -1,0 +1,9 @@
+{
+  "title": "钟馗风控薅羊毛手机号识别",
+  "name": "qiankeji",
+  "ps": "启安科技大数据风控平台接口，精准识别恶意批量注册手机号",
+  "versions": "1.0",
+  "checks": "/www/server/panel/plugin/qiankeji",
+  "author": "启安科技",
+  "home": "https://www.qiansec.com"
+}

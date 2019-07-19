@@ -1,0 +1,9 @@
+{
+  "title": "宝塔助手",
+  "name": "ouken_helper_goto_dir",
+  "ps": "[推荐]-更方便快捷的使用宝塔",
+  "versions": "1.2",
+  "checks": "/www/server/panel/plugin/ouken_helper_goto_dir",
+  "author": "河妖",
+  "home": "https://www.bt.cn/bbs/forum.php?mod=viewthread&tid=34640"
+}

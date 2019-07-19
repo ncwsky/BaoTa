@@ -1,0 +1,9 @@
+{
+  "title": "404公益",
+  "name": "publicwelfare404",
+  "ps": "响应式404公益代码，美化你的404页面同时参与公益",
+  "versions": "1.0",
+  "checks": "/www/server/panel/plugin/publicwelfare404",
+  "author": "DNPW.org",
+  "home": "https://www.dnpw.org"
+}
