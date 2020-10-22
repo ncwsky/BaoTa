@@ -281,6 +281,11 @@ class panelPlugin:
                 for softInfo in softList['list']:
                     if softInfo['name'].find(get.query) != -1 or softInfo['title'].find(get.query) != -1: tmpList.append(softInfo)
                 softList['list'] = tmpList
+
+        softList['pro'] = 1
+        for soft in softList['list']:
+            soft['endtime'] = 1
+
         return softList
 
     #清除多余面板日志
